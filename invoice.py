@@ -1,34 +1,27 @@
 import requests
-import datetime
-import os
-from dotenv import load_dotenv
 import convert
+import datetime
+import globalvariables
 
 
-def invoice(usd):
-    # Load env to get the api key
-    load_dotenv()
-
-    STRIKE_API_BASE_URL = "https://api.strike.me/v1"
-    STRIKE_API_KEY = os.getenv("STRIKE_API_KEY")
-
+def generate(usd, description):
     # Convert the amount in USD to BTC
     btc_amount = convert.usd_to_btc(float(usd))
 
     if not btc_amount:
         raise Exception('Error converting USD to BTC')
 
-    # Get current system time to generate a unique ID for the transaction
+    # Generate a unique ID using the machine time (up to you)
     now = datetime.datetime.now()
-    transaction_id = now.strftime('%d%m%Y%H%M%S') + f'{now.microsecond // 10000}{(now.microsecond % 10000) // 100}'
+    correlation_id = now.strftime('%d%m%Y%H%M%S') + f'{now.microsecond // 10000}{(now.microsecond % 10000) // 100}'
 
     # Generate the invoice using the API endpoints
-    invoice_endpoint = f'{STRIKE_API_BASE_URL}/invoices'
+    invoice_endpoint = f'{globalvariables.base_url}/invoices'
     quote_endpoint = f'{invoice_endpoint}/{{invoice_id}}/quote'
 
     invoice_data = {
-        'correlationId': f'{transaction_id}',
-        'description': f'Transaction ID: {transaction_id}',
+        'correlationId': f'{correlation_id}',
+        'description': f'{description}',
         'amount': {
             'currency': 'BTC',
             'amount': str(btc_amount)
@@ -36,7 +29,7 @@ def invoice(usd):
     }
 
     headers = {
-        'Authorization': f'Bearer {STRIKE_API_KEY}',
+        'Authorization': f'Bearer {globalvariables.api_key}',
         'Content-Type': 'application/json'
     }
 
@@ -55,8 +48,13 @@ def invoice(usd):
 
             quote = quote_response.json()
 
-            # Return the invoice, description, amount (can add more stuff here if you want)
-            return quote['lnInvoice'], quote['description'], quote['targetAmount']['amount']
+            # Combine invoice and quote information into a single JSON object
+            combined_response = {
+                "invoice": invoice,
+                "quote": quote
+            }
+
+            return combined_response
         else:
             raise Exception(quote_response.json())
     else:
