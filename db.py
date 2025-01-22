@@ -118,7 +118,7 @@ def get_paid_undelivered_invoices():
         return f"Error: {e}"
 
 
-# Function to delete a row where the invoiceId matches
+# Function to delete a row where the invoiceId matches. Good to clean the database of unpaid expired invoices
 def delete_invoice_by_id(invoice_id):
     try:
         # Connect to the database
@@ -144,7 +144,7 @@ def delete_invoice_by_id(invoice_id):
         return f"Error: {e}"
 
 
-# Function to check if an invoiceId is still valid
+# Function to check if an invoiceId is still valid. Each invoice expires in 1 hour
 def is_invoice_valid(invoice_id):
     try:
         # Connect to the database
