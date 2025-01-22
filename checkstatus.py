@@ -2,6 +2,7 @@ import requests
 import globalvariables
 
 
+# Function to call the Strike API to check an invoice state (paid or unpaid)
 def paid_invoice(invoice_id):
     invoice_url = f'{globalvariables.base_url}/invoices/{invoice_id}'
 

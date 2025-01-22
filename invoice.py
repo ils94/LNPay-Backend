@@ -4,6 +4,9 @@ import datetime
 import globalvariables
 
 
+# Function to generate an invoice. You can modify the part for the correlation id for something else that your system
+# generates. It MUST be unique everytime, otherwise the Strike API will return an error (using the machine time with
+# milliseconds was the best approach I came with)
 def generate(usd, description):
     # Convert the amount in USD to BTC
     btc_amount = convert.usd_to_btc(float(usd))

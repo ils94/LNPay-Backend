@@ -1,20 +1,18 @@
 from flask import Flask, request, jsonify
 import invoice
 import qrcodeimage
-from dotenv import load_dotenv
 import db
-
-load_dotenv()
 
 app = Flask(__name__)
 
 
+# Main endpoint for the backend. This will generate the invoice after receiving an amount
 @app.route('/generate-invoice', methods=['POST'])
 def generate_invoice():
     try:
         # Extract the amount or other data from the request if needed
         data = request.get_json()
-        amount = data.get("amount", 449.95)  # Default to Unlimited Wraith Cannon if no amount is provided
+        amount = data.get("amount")
 
         # Call the generate function. The decription should be something provided by your own system.
         invoice_json = invoice.generate(amount, "test")

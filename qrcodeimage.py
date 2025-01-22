@@ -3,9 +3,11 @@ import io
 import base64
 
 
-def generate(ln_invoice):
+# Function to generate a QR Code image from the lninvoice and convert that to base64, making it easier to show
+# in a webpage
+def generate(lninvoice):
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    qr.add_data(ln_invoice)
+    qr.add_data(lninvoice)
     qr.make(fit=True)
 
     img = qr.make_image(fill='black', back_color='white')
