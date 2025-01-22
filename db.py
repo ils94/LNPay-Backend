@@ -118,6 +118,32 @@ def get_paid_undelivered_invoices():
         return f"Error: {e}"
 
 
+# Function to set delivered status to 'YES' for a given invoiceId
+def set_invoice_delivered(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Execute the UPDATE query to set delivered as 'YES'
+        cursor.execute('''
+        UPDATE invoices SET delivered = 'YES' WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Commit the changes
+        connection.commit()
+        affected_rows = cursor.rowcount
+        connection.close()
+
+        # Return the result
+        if affected_rows > 0:
+            return f"Invoice with ID {invoice_id} marked as delivered."
+        else:
+            return f"No invoice found with ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Function to delete a row where the invoiceId matches. Good to clean the database of unpaid expired invoices
 def delete_invoice_by_id(invoice_id):
     try:
