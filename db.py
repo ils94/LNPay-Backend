@@ -92,6 +92,32 @@ def get_unpaid_invoices():
         return f"Error: {e}"
 
 
+# Function to set the state of an invoice to 'PAID'
+def set_invoice_paid(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Execute the UPDATE query to set state as 'PAID'
+        cursor.execute('''
+        UPDATE invoices SET state = 'PAID' WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Commit the changes
+        connection.commit()
+        affected_rows = cursor.rowcount
+        connection.close()
+
+        # Return the result
+        if affected_rows > 0:
+            return f"Invoice with ID {invoice_id} marked as paid."
+        else:
+            return f"No invoice found with ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Function to retrieve all invoice IDs with state PAID and delivered set as NO
 def get_paid_undelivered_invoices():
     try:
