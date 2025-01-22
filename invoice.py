@@ -11,7 +11,7 @@ def generate(usd, description):
     if not btc_amount:
         raise Exception('Error converting USD to BTC')
 
-    # Generate a unique ID using the machine time (up to you)
+    # Generate a unique ID using the machine time (you must use something unique here that is always different)
     now = datetime.datetime.now()
     correlation_id = now.strftime('%d%m%Y%H%M%S') + f'{now.microsecond // 10000}{(now.microsecond % 10000) // 100}'
 

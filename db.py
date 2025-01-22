@@ -16,6 +16,7 @@ def create_database():
         description TEXT,
         invoiceId TEXT,
         state TEXT,
+        delivered TEXT,
         expiration TEXT,
         lnInvoice TEXT
     )
@@ -40,6 +41,7 @@ def insert_invoice(json_data):
         description = invoice['description']
         invoiceid = invoice['invoiceId']
         state = invoice['state']
+        delivered = "NO"
         expiration = quote['expiration']
         lninvoice = quote['lnInvoice']
 
@@ -50,10 +52,10 @@ def insert_invoice(json_data):
         cursor.execute('''
         INSERT INTO invoices (
             amount, currency, correlation, created, description, 
-            invoiceId, state, expiration, lnInvoice
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            invoiceId, state, delivered, expiration, lnInvoice
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (amount, currency, correlation, created, description,
-              invoiceid, state, expiration, lninvoice))
+              invoiceid, state, delivered, expiration, lninvoice))
 
         connection.commit()
         connection.close()

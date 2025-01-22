@@ -16,7 +16,7 @@ def generate_invoice():
         data = request.get_json()
         amount = data.get("amount", 449.95)  # Default to Unlimited Wraith Cannon if no amount is provided
 
-        # Call the generate function
+        # Call the generate function. The decription should be something provided by your own system.
         invoice_json = invoice.generate(amount, "test")
 
         # Generate a QR code for the invoice
