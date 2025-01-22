@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import invoice
 import qrcodeimage
 from dotenv import load_dotenv
+import db
 
 load_dotenv()
 
@@ -30,6 +31,9 @@ def generate_invoice():
                 "qr_code": qr_code_image_base64
             }
         }
+
+        # Insert the relevant data of the invoice into a database for future use
+        db.insert_invoice(response_data)
 
         # Return the JSON response
         return jsonify(response_data), 200
