@@ -14,8 +14,8 @@ def generate_invoice():
         data = request.get_json()
         amount = data.get("amount")
 
-        # Call the generate function. The decription should be something provided by your own system.
-        invoice_json = invoice.generate(amount, "test")
+        # Call the generate function.
+        invoice_json = invoice.generate(amount)
 
         # Generate a QR code for the invoice
         qr_code_image_base64 = qrcodeimage.generate(invoice_json['quote']['lnInvoice'])
@@ -42,4 +42,6 @@ def generate_invoice():
 
 
 if __name__ == '__main__':
+    db.create_database()
+
     app.run(debug=True)

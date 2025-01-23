@@ -1,22 +1,21 @@
 import requests
 import convert
-import datetime
 import globalvariables
+import metadata
 
 
 # Function to generate an invoice. You can modify the part for the correlation id for something else that your system
 # generates. It MUST be unique everytime, otherwise the Strike API will return an error (using the machine time with
 # milliseconds was the best approach I came with)
-def generate(usd, description):
+def generate(amount):
     # Convert the amount in USD to BTC
-    btc_amount = convert.usd_to_btc(float(usd))
+    btc_amount = convert.usd_to_btc(float(amount))
 
     if not btc_amount:
         raise Exception('Error converting USD to BTC')
 
-    # Generate a unique ID using the machine time (you must use something unique here that is always different)
-    now = datetime.datetime.now()
-    correlation_id = now.strftime('%d%m%Y%H%M%S') + f'{now.microsecond // 10000}{(now.microsecond % 10000) // 100}'
+    correlation_id = metadata.generate_correlation_id()
+    description = metadata.generate_description()
 
     # Generate the invoice using the API endpoints
     invoice_endpoint = f'{globalvariables.base_url}/invoices'

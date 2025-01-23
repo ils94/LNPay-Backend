@@ -30,7 +30,6 @@ def create_database():
 def insert_invoice(json_data):
     # Extract relevant information from the JSON
     try:
-        create_database()
 
         invoice = json_data['data']['invoice']
         quote = json_data['data']['quote']
@@ -86,8 +85,6 @@ def get_unpaid_invoices():
         if result:
             # Extract invoice IDs from the result tuples
             return [row[0] for row in result]
-        else:
-            return "No unpaid invoices found."
     except Exception as e:
         return f"Error: {e}"
 
@@ -112,8 +109,6 @@ def set_invoice_paid(invoice_id):
         # Return the result
         if affected_rows > 0:
             return f"Invoice with ID {invoice_id} marked as paid."
-        else:
-            return f"No invoice found with ID {invoice_id}."
     except Exception as e:
         return f"Error: {e}"
 
@@ -164,8 +159,6 @@ def set_invoice_delivered(invoice_id):
         # Return the result
         if affected_rows > 0:
             return f"Invoice with ID {invoice_id} marked as delivered."
-        else:
-            return f"No invoice found with ID {invoice_id}."
     except Exception as e:
         return f"Error: {e}"
 
@@ -189,9 +182,6 @@ def get_delivered_status(invoice_id):
         if result:
             # Return the delivered status (should be "YES" or "NO")
             return result[0]
-        else:
-            # If no such invoice exists
-            return "Invoice not found."
     except Exception as e:
         return f"Error: {e}"
 
