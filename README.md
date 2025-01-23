@@ -85,7 +85,7 @@ The following utility functions are available for managing invoices:
 ## File Structure
 
 ```
-LNBackEnd/
+LNPay-Backend/
 ├── main.py             # Main Flask application
 ├── worker.py           # Worker script to check and update invoice statuses
 ├── db.py               # SQLite database setup and queries
