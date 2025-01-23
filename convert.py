@@ -2,7 +2,8 @@ import requests
 import currencies
 
 
-# Function to convert USD into BTC using CoinGecko API
+# Function to convert fiat into BTC using CoinGecko API
+# Not all fiat currency is compatible
 def fiat_to_btc(amount, currency):
     # Ensure the currency exists in the fiat_currencies dictionary
     if currency not in currencies.fiat:
