@@ -5,7 +5,7 @@ import currencies
 # Function to convert fiat into BTC using CoinGecko API
 # Not all fiat currency is compatible
 def fiat_to_btc(amount, currency):
-    # Ensure the currency exists in the fiat_currencies dictionary
+    # Ensure the currency exists in the fiat dictionary
     if currency not in currencies.fiat:
         raise ValueError(
             f"Currency '{currency}' is not supported. Please choose from: {', '.join(currencies.fiat.keys())}")
