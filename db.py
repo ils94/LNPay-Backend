@@ -170,6 +170,32 @@ def set_invoice_delivered(invoice_id):
         return f"Error: {e}"
 
 
+# Function to get the 'delivered' status of an invoice
+def get_delivered_status(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to get the delivered status of the given invoiceId
+        cursor.execute('''
+        SELECT delivered FROM invoices WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            # Return the delivered status (should be "YES" or "NO")
+            return result[0]
+        else:
+            # If no such invoice exists
+            return "Invoice not found."
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Function to delete a row where the invoiceId matches. Good to clean the database of unpaid expired invoices
 def delete_invoice_by_id(invoice_id):
     try:
