@@ -1,3 +1,4 @@
 flask
 qrcode[pil]
 requests
+python-dotenv

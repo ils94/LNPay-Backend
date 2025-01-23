@@ -9,10 +9,10 @@ import metadata
 # milliseconds was the best approach I came with)
 def generate(amount):
     # Convert the amount in USD to BTC
-    btc_amount = convert.usd_to_btc(float(amount))
+    btc_amount = convert.fiat_to_btc(float(amount), globalvariables.currency)
 
     if not btc_amount:
-        raise Exception('Error converting USD to BTC')
+        raise Exception(f'Error converting {globalvariables.currency} to BTC')
 
     correlation_id = metadata.generate_correlation_id()
     description = metadata.generate_description()
