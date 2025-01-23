@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #qrCode {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            max-height: 50vh;
+            margin-bottom: 20px;
+        }
+
+        #invoice {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 50%;
+            max-height: 15vh;
+            overflow: auto;
+            text-align: left;
+            word-wrap: break-word;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<h2 id="amountSats">Value in BTC: {{ amount_sats }}</h2>
+<img id="qrCode" src="data:image/png;base64,{{ qr_code }}" alt="QR Code"/>
+<h2>Invoice</h2>
+<div id="invoice">
+    <pre>{{ invoice }}</pre>
+</div>
+</body>
+</html>
