@@ -89,7 +89,7 @@ LNPay-Backend/
 ├── main.py             # Main Flask application
 ├── worker.py           # Worker script to check and update invoice statuses
 ├── db.py               # SQLite database setup and queries
-├── currencies.py       # Dictionary with apparently support currencies from CoinGecko
+├── currencies.py       # Dictionary with apparently supported currencies from CoinGecko
 ├── invoice.py          # Invoice generation and management
 ├── qrcodeimage.py      # QR code generation
 ├── metadata.py         # Helper functions for metadata generation
