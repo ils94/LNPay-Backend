@@ -8,13 +8,16 @@ def check_invoice_status():
     # in the database. To prevent abuse by users generating a large number of invoices, you should check if
     # the user already has a valid unpaid invoice. If so, replace the existing unpaid invoice with the newly
     # generated one, or simply display the old unpaid invoice to the user.
-    # Allow the user to decide whether to delete the old invoice and generate a new one, or pay the existing one.
-    # Additionally, show the user how much time is left to pay the current invoice
-    # This worker will create batches up to 600 invoices and run each batch in cycles
-    # expired invoices will be deleted (invoices has a lifetime of 1 hour)
 
-    # This project aims to create a generic backend to anyone implement in their projects. You should change the code
-    # based on your project needs.
+    # Allow the user to decide whether to delete the old invoice and generate a new one, or pay the existing one.
+
+    # Additionally, show the user how much time is left to pay the current invoice.
+
+    # This worker will create batches up to 600 invoices and run each batch in cycles,
+    # expired invoices will be deleted (invoices has a lifetime of 1 hour).
+
+    # This project aims to create a generic backend so anyone can implement it in their projects.
+    # You should change the code based on your project needs.
 
     # Define the maximum batch size for API limits
     max_batch_size = 600
