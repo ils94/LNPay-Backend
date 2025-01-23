@@ -24,12 +24,13 @@ def check_invoice_status():
 
     while True:
         invoices = db.get_unpaid_invoices()
-        total_invoices = len(invoices)
-
-        print(f"Total unpaid invoices: {total_invoices}")
-        print(f"Invoices: {invoices}")
 
         if invoices:
+            total_invoices = len(invoices)
+
+            print(f"Total unpaid invoices: {total_invoices}")
+            print(f"Invoices: {invoices}")
+
             # If there are more invoices than the max batch size, split into batches
             if total_invoices > max_batch_size:
                 num_batches = (total_invoices + max_batch_size - 1) // max_batch_size  # Round up to cover all invoices
