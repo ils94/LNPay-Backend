@@ -257,7 +257,7 @@ def is_invoice_valid(invoice_id):
         cursor = connection.cursor()
 
         # Get the current time in ISO 8601 format
-        current_time = (datetime.utcnow() + timedelta(minutes=globalvariables.expiration_off_set)).strftime(
+        current_time = (datetime.utcnow() + timedelta(minutes=globalvariables.expiration_offset)).strftime(
             '%Y-%m-%dT%H:%M:%SZ')
 
         # Query to check if the invoiceId is valid
