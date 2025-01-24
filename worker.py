@@ -21,7 +21,7 @@ def check_invoice_status():
     # You should change the code based on your project needs.
 
     # Define the maximum batch size for API limits
-    max_batch_size = 600
+    max_batch_size = 1000
 
     while True:
         invoices = db.get_unpaid_invoices()
@@ -39,7 +39,7 @@ def check_invoice_status():
 
                 for batch_index in range(0, total_invoices, max_batch_size):
                     batch = invoices[batch_index:batch_index + max_batch_size]
-                    wait_time = len(batch) * 0.65  # Dynamic wait time based on batch size
+                    wait_time = len(batch) * 0.70  # Dynamic wait time based on batch size
                     print(f"Processing batch {batch_index // max_batch_size + 1}/{num_batches}: {batch}")
 
                     process_batch(batch)
@@ -90,12 +90,17 @@ def process_batch(batch):
                 if is_success:
                     print(f"Invoice {invoice} is PAID but expired. Deleting from the local database...")
                     db.delete_invoice_by_id(invoice)
+                else:
+                    print("Something wrong with the refund API, check it asap! Moving invoice to refund_failure table")
+                    db.copy_to_refund_failure(invoice)
+                    db.delete_invoice_by_id(invoice)
         else:
             is_valid = db.is_invoice_valid(invoice)
             print(f"Is invoice still valid: {is_valid}")
 
             if not is_valid:
-                print(f"Invoice {invoice} is UNPAID but expired. Deleting from the local database...")
+                print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
+                db.copy_to_expired(invoice)
                 db.delete_invoice_by_id(invoice)
 
 

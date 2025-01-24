@@ -23,6 +23,40 @@ def create_database():
         refund_address TEXT
     )
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS expired (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            amount TEXT,
+            currency TEXT,
+            correlation TEXT,
+            created TEXT,
+            description TEXT,
+            invoiceId TEXT,
+            state TEXT,
+            delivered TEXT,
+            expiration TEXT,
+            lnInvoice TEXT,
+            refund_address TEXT
+        )
+        ''')
+
+    cursor.execute('''
+            CREATE TABLE IF NOT EXISTS refund_failure (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                amount TEXT,
+                currency TEXT,
+                correlation TEXT,
+                created TEXT,
+                description TEXT,
+                invoiceId TEXT,
+                state TEXT,
+                delivered TEXT,
+                expiration TEXT,
+                lnInvoice TEXT,
+                refund_address TEXT
+            )
+            ''')
     connection.commit()
     connection.close()
 
@@ -217,7 +251,7 @@ def delete_invoice_by_id(invoice_id):
 def is_invoice_valid(invoice_id):
     try:
 
-        offset_minutes = 58
+        offset_minutes = 45
 
         # Connect to the database
         connection = sqlite3.connect("invoices.sqlite")
@@ -295,5 +329,78 @@ def get_amount_by_invoice_id(invoice_id):
             return result[0]
         else:
             return f"No amount found for invoice ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to copy a row to the expired table based on invoiceId
+def copy_to_expired(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Select the row where invoiceId matches
+        cursor.execute('''
+        SELECT amount, currency, correlation, created, description, invoiceId, 
+               state, delivered, expiration, lnInvoice, refund_address
+        FROM invoices WHERE invoiceId = ?
+        ''', (invoice_id,))
+        row = cursor.fetchone()
+
+        if row:
+            # Insert the row into the expired table
+            cursor.execute('''
+            INSERT INTO expired (
+                amount, currency, correlation, created, description, invoiceId, 
+                state, delivered, expiration, lnInvoice, refund_address
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', row)
+
+            # Commit the changes
+            connection.commit()
+            connection.close()
+
+            return f"Invoice with ID {invoice_id} copied to the expired table."
+        else:
+            connection.close()
+            return f"No invoice found with ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to copy a row to the refund_failure table based on invoiceId
+# You can run a refund again using only this table if necessary
+def copy_to_refund_failure(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Select the row where invoiceId matches
+        cursor.execute('''
+        SELECT amount, currency, correlation, created, description, invoiceId, 
+               state, delivered, expiration, lnInvoice, refund_address
+        FROM invoices WHERE invoiceId = ?
+        ''', (invoice_id,))
+        row = cursor.fetchone()
+
+        if row:
+            # Insert the row into the expired table
+            cursor.execute('''
+            INSERT INTO refund_failure (
+                amount, currency, correlation, created, description, invoiceId, 
+                state, delivered, expiration, lnInvoice, refund_address
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', row)
+
+            # Commit the changes
+            connection.commit()
+            connection.close()
+
+            return f"Invoice with ID {invoice_id} copied to the expired table."
+        else:
+            connection.close()
+            return f"No invoice found with ID {invoice_id}."
     except Exception as e:
         return f"Error: {e}"
