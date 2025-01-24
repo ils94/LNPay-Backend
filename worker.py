@@ -1,6 +1,7 @@
 import db
 import checkstatus
 import time
+import refund
 
 
 def check_invoice_status():
@@ -55,7 +56,7 @@ def check_invoice_status():
         else:
             # If no unpaid invoices are found, wait before checking again
             print("No unpaid invoices found. Waiting...")
-            time.sleep(30)  # Default wait time if no invoices are found
+            time.sleep(1)  # Default wait time if no invoices are found
 
 
 def process_batch(batch):
@@ -65,16 +66,30 @@ def process_batch(batch):
         print(f"{invoice} status: {status}")
 
         if status.upper() == 'PAID':
-            db.set_invoice_paid(invoice)
-            delivered = db.get_delivered_status(invoice)
+            is_valid = db.is_invoice_valid(invoice)
 
-            if delivered == 'NO':
-                print(f"Setting {invoice} as delivered.")
+            if is_valid:
+                db.set_invoice_paid(invoice)
+                delivered = db.get_delivered_status(invoice)
 
-                # Add here your logic to delivery your product and change the delivery status on
-                # your local database after
+                if delivered == 'NO':
+                    print(f"Setting {invoice} as delivered.")
 
-                db.set_invoice_delivered(invoice)
+                    # Add here your logic to delivery your product and change the delivery status on
+                    # your local database after
+
+                    db.set_invoice_delivered(invoice)
+            else:
+                print(f"refunding invoice because it was not paid in time {invoice}")
+
+                refund_address = db.get_refund_address(invoice)
+                amount = db.get_amount_by_invoice_id(invoice)
+
+                is_success = refund.is_success(refund_address, amount)
+
+                if is_success:
+                    print(f"Invoice {invoice} is PAID but expired. Deleting from the local database...")
+                    db.delete_invoice_by_id(invoice)
         else:
             is_valid = db.is_invoice_valid(invoice)
             print(f"Is invoice still valid: {is_valid}")

@@ -13,6 +13,7 @@ def generate_invoice():
         # Extract the amount or other data from the request if needed
         data = request.get_json()
         amount = data.get("amount")
+        ln_address = data.get("ln_address")
 
         # Call the generate function.
         invoice_json = invoice.generate(amount)
@@ -31,7 +32,7 @@ def generate_invoice():
         }
 
         # Insert the relevant data of the invoice into a database for future use
-        db.insert_invoice(response_data)
+        db.insert_invoice(response_data, ln_address)
 
         # Here you can choose what type of data you want to return
 

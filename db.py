@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 # Function to create the SQLite database and table
@@ -10,7 +10,7 @@ def create_database():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS invoices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        amount REAL,
+        amount TEXT,
         currency TEXT,
         correlation TEXT,
         created TEXT,
@@ -19,7 +19,8 @@ def create_database():
         state TEXT,
         delivered TEXT,
         expiration TEXT,
-        lnInvoice TEXT
+        lnInvoice TEXT,
+        refund_address TEXT
     )
     ''')
     connection.commit()
@@ -27,14 +28,14 @@ def create_database():
 
 
 # Function to insert data into the SQLite database
-def insert_invoice(json_data):
+def insert_invoice(json_data, ln_address):
     # Extract relevant information from the JSON
     try:
 
         invoice = json_data['data']['invoice']
         quote = json_data['data']['quote']
 
-        amount = float(invoice['amount']['amount'])
+        amount = invoice['amount']['amount']
         currency = invoice['amount']['currency']
         correlation = invoice['correlationId']
         created = invoice['created']
@@ -52,10 +53,10 @@ def insert_invoice(json_data):
         cursor.execute('''
         INSERT INTO invoices (
             amount, currency, correlation, created, description, 
-            invoiceId, state, delivered, expiration, lnInvoice
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            invoiceId, state, delivered, expiration, lnInvoice, refund_address
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (amount, currency, correlation, created, description,
-              invoiceid, state, delivered, expiration, lninvoice))
+              invoiceid, state, delivered, expiration, lninvoice, ln_address))
 
         connection.commit()
         connection.close()
@@ -215,12 +216,15 @@ def delete_invoice_by_id(invoice_id):
 # Function to check if an invoiceId is still valid. Each invoice expires in 1 hour
 def is_invoice_valid(invoice_id):
     try:
+
+        offset_minutes = 58
+
         # Connect to the database
         connection = sqlite3.connect("invoices.sqlite")
         cursor = connection.cursor()
 
         # Get the current time in ISO 8601 format
-        current_time = datetime.utcnow().isoformat()
+        current_time = (datetime.utcnow() + timedelta(minutes=offset_minutes)).strftime('%Y-%m-%dT%H:%M:%SZ')
 
         # Query to check if the invoiceId is valid
         cursor.execute('''
@@ -237,5 +241,59 @@ def is_invoice_valid(invoice_id):
             return True
         else:
             return False
+    except Exception as e:
+        return f"Error: {e}"
+
+
+def get_refund_address(invoice_id):
+    """
+    Retrieve the refund address for a specific invoice ID.
+    """
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to get the refund_address for the given invoiceId
+        cursor.execute('''
+        SELECT refund_address FROM invoices WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            # Return the refund address
+            return result[0]
+        else:
+            return f"No refund address found for invoice ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
+def get_amount_by_invoice_id(invoice_id):
+    """
+    Retrieve the amount for a specific invoice ID.
+    """
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to get the amount for the given invoiceId
+        cursor.execute('''
+        SELECT amount FROM invoices WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            # Return the amount
+            return result[0]
+        else:
+            return f"No amount found for invoice ID {invoice_id}."
     except Exception as e:
         return f"Error: {e}"
