@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime, timedelta
+import globalvariables
 
 
 # Function to create the SQLite database and table
@@ -251,14 +252,13 @@ def delete_invoice_by_id(invoice_id):
 def is_invoice_valid(invoice_id):
     try:
 
-        offset_minutes = 59
-
         # Connect to the database
         connection = sqlite3.connect("invoices.sqlite")
         cursor = connection.cursor()
 
         # Get the current time in ISO 8601 format
-        current_time = (datetime.utcnow() + timedelta(minutes=offset_minutes)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        current_time = (datetime.utcnow() + timedelta(minutes=globalvariables.expiration_off_set)).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
 
         # Query to check if the invoiceId is valid
         cursor.execute('''
