@@ -2,6 +2,10 @@ import requests
 import globalvariables
 
 
+# Functions to execute refunds
+# There is not a refund endpoint for Strike API, so what I did was basically create a payment to the user
+# to send back what he/she sent when the invoices were considered expired by the server's worker
+# It a gimmick, but works
 def create_payment_quote(lightning_address, amount):
     """
     Create a payment quote for a Lightning Address.

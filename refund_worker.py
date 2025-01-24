@@ -4,6 +4,10 @@ import refund
 
 
 def rerun_refund():
+
+    # The same idea as the worker, but with a different batch size and wait time, also the process batch is
+    # much simpler
+
     max_batch_size = 250
 
     while True:
