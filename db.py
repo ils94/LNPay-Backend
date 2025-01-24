@@ -251,7 +251,7 @@ def delete_invoice_by_id(invoice_id):
 def is_invoice_valid(invoice_id):
     try:
 
-        offset_minutes = 45
+        offset_minutes = 59
 
         # Connect to the database
         connection = sqlite3.connect("invoices.sqlite")
@@ -263,6 +263,39 @@ def is_invoice_valid(invoice_id):
         # Query to check if the invoiceId is valid
         cursor.execute('''
         SELECT expiration FROM invoices 
+        WHERE invoiceId = ? AND expiration > ?
+        ''', (invoice_id, current_time))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        # Check if a result was found
+        if result:
+            return True
+        else:
+            return False
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to check if an invoiceId is still valid. Each invoice expires in 1 hour
+def is_invoice_valid_one_hour(invoice_id):
+    try:
+
+        # Add more time to make sure
+        offset_minutes = -5
+
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Get the current time in ISO 8601 format
+        current_time = (datetime.utcnow() + timedelta(minutes=offset_minutes)).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        # Query to check if the invoiceId is valid
+        cursor.execute('''
+        SELECT expiration FROM expired 
         WHERE invoiceId = ? AND expiration > ?
         ''', (invoice_id, current_time))
 
@@ -401,6 +434,79 @@ def copy_to_refund_failure(invoice_id):
             return f"Invoice with ID {invoice_id} copied to the expired table."
         else:
             connection.close()
+            return f"No invoice found with ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to retrieve refund_address and amount from the refund_failure table based on invoiceId
+def get_refund_failure_details(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to get refund_address and amount from refund_failure table for the given invoiceId
+        cursor.execute('''
+        SELECT refund_address, amount FROM refund_failure WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            # Return both refund_address and amount as a tuple
+            return {result[0], result[1]}
+
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to select all records from the refund_failure table
+def get_all_refund_failures():
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to select all records from refund_failure table
+        cursor.execute('''
+        SELECT * FROM refund_failure
+        ''')
+
+        # Fetch all results
+        result = cursor.fetchall()
+        connection.close()
+
+        if result:
+            # Return all records as a list of tuples
+            return result
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to delete a row where the invoiceId matches. Good to clean the database of unpaid expired invoices
+def delete_refund_failure_invoice(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Execute the DELETE query
+        cursor.execute('''
+        DELETE FROM refund_failure WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Commit the changes
+        connection.commit()
+        affected_rows = cursor.rowcount
+        connection.close()
+
+        # Return the result
+        if affected_rows > 0:
+            return f"Invoice with ID {invoice_id} successfully deleted."
+        else:
             return f"No invoice found with ID {invoice_id}."
     except Exception as e:
         return f"Error: {e}"

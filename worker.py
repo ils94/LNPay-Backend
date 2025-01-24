@@ -47,7 +47,7 @@ def check_invoice_status():
                     time.sleep(wait_time)
             else:
                 # If total invoices <= max_batch_size, process them all at once
-                wait_time = total_invoices * 0.65  # Dynamic wait time
+                wait_time = total_invoices * 0.70  # Dynamic wait time
                 print(f"Processing all invoices in a single batch: {invoices}")
 
                 process_batch(invoices)
@@ -88,9 +88,10 @@ def process_batch(batch):
                 is_success = refund.is_success(refund_address, amount)
 
                 if is_success:
-                    print(f"Invoice {invoice} is PAID but expired. Deleting from the local database...")
+                    print(f"Deleting {invoice} from invoices database...")
                     db.delete_invoice_by_id(invoice)
                 else:
+                    # This will only happen if something very wrong happened
                     print("Something wrong with the refund API, check it asap! Moving invoice to refund_failure table")
                     db.copy_to_refund_failure(invoice)
                     db.delete_invoice_by_id(invoice)
