@@ -87,24 +87,24 @@ The following utility functions are available for managing invoices:
 
 ```
 LNPay-Backend/
+├── .env                # Environment variables (not included in repo)
+├── checkstatus.py      # Strike API integration for status checks
+├── convert.py          # USD to BTC conversion logic
+├── currencies.py       # Dictionary with apparently supported currencies from CoinGecko
+├── db.py               # SQLite database setup and queries
+├── expired_worker.py   # Worker script to check expired invoices and refund them if needed
+├── globalvariables.py  # Contain variables used in the whole project
+├── invoice.py          # Invoice generation and management
 ├── main.py             # Main Flask application
 ├── main_worker.py      # Worker script to check and update invoice statuses
-├── refund_worker.py    # Worker script to rerun refund attempts
-├── expired_worker.py   # Worker script to check expired invoices and refund them if needed
-├── refund_api.py       # Contain functions to initiate refunds
-├── db.py               # SQLite database setup and queries
-├── globalvariables.py  # Contain variables used in the whole project
-├── currencies.py       # Dictionary with apparently supported currencies from CoinGecko
-├── invoice.py          # Invoice generation and management
-├── qrcodeimage.py      # QR code generation
 ├── metadata.py         # Helper functions for metadata generation
-├── convert.py          # USD to BTC conversion logic
-├── checkstatus.py      # Strike API integration for status checks
-├── templates/
-│   └── qr_code.html    # HTML template for displaying QR codes
-├── .env                # Environment variables (not included in repo)
+├── qrcodeimage.py      # QR code generation
+├── refund_api.py       # Contain functions to initiate refunds
+├── refund_worker.py    # Worker script to rerun refund attempts
 ├── requirements.txt    # Python dependencies
-└── README.md           # Project documentation
+├── README.md           # Project documentation
+└── templates/
+    └── qr_code.html    # HTML template for displaying QR codes
 ```
 
 ## Notes
