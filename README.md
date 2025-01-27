@@ -13,7 +13,7 @@ LNPay-Backend is a backend solution for handling Bitcoin Lightning Network payme
 
 ## Requirements
 
-- Python 3.7+
+- Python 3.9+
 - SQLite (included with Python)
 
 ## Installation
