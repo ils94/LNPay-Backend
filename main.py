@@ -74,7 +74,15 @@ def generate_invoice():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# Need a public server to test this one
+# A public server is required to test this.
+
+# The webhook will notify you when an invoice's state changes. This is considered best practice
+# compared to using main_worker.py.
+# However, it relies on Strike consistently notifying you of invoice changes.
+# Additionally, you are still limited by the number of API calls you make, as the webhook
+# does not provide detailed information about invoice state changes (e.g., paid/unpaid).
+# You will still need to use check_status.py to determine the actual state of the invoice.
+
 @app.route('/webhook', methods=['POST'])
 def strike_webhook():
     """

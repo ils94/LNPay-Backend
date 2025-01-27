@@ -32,6 +32,8 @@ api_key = os.getenv("STRIKE_API_KEY")
 
 webhook_secret = os.getenv("WEBHOOK_SECRET")
 
+webhook_url = "https://yourdomain.com/webhook"
+
 currency = "usd"
 
 expiration_offset = 45
