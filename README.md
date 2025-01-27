@@ -10,7 +10,7 @@ LNPay-Backend is a backend solution for handling Bitcoin Lightning Network payme
 - **Payment Verification**: Verify the status of Lightning invoices (paid or unpaid).
 - **Automated Status Updates**: Use a worker script to loop through and update invoice statuses and delivery status.
 - **QR Code Generation**: Generate QR codes for Lightning invoices for easy payment.
-- - **Automatic Refund**: Refund invoices expired invoices
+- **Automatic Refund**: Refund expired invoices.
 
 ## Requirements
 
