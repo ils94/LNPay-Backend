@@ -5,11 +5,12 @@ LNPay-Backend is a backend solution for handling Bitcoin Lightning Network payme
 ## Features
 
 - **Invoice Generation**: Automatically generate Bitcoin Lightning invoices using the Strike API.
-- **USD to BTC Conversion**: Convert amounts in USD to BTC using the CoinGecko API.
+- **Currency to BTC Conversion**: Convert amounts in supported currencies to BTC using the CoinGecko API.
 - **Invoice Management**: Store and manage invoice data in an SQLite database.
 - **Payment Verification**: Verify the status of Lightning invoices (paid or unpaid).
 - **Automated Status Updates**: Use a worker script to loop through and update invoice statuses and delivery status.
 - **QR Code Generation**: Generate QR codes for Lightning invoices for easy payment.
+- **Automatic Refund**: Refund expired invoices.
 
 ## Requirements
 
@@ -49,7 +50,7 @@ This will:
 
 ### 2. Verifying Invoice Status
 To verify the status of invoices and update the database:
-1. Run the `worker.py` script:
+1. Run the `main_worker.py` script:
    ```bash
    python main_worker.py
    ```
@@ -62,12 +63,13 @@ To verify the status of invoices and update the database:
 Send a POST request to `/generate-invoice` with the desired amount:
 ```json
 {
-  "amount": 0.01
+  "amount": 0.01,
+  "ln_address": "costumerlightningaddressforrefundactions"
 }
 ```
 Curl
 ```
-curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount\": 0.01}"
+curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount\": 0.01, \"ln_address\": \"costumerlightningaddressforrefundactions\"}" > "%USERPROFILE%\Desktop\response.html"
 ```
 This will return:
 - Invoice details
@@ -79,34 +81,35 @@ The following utility functions are available for managing invoices:
 - **Mark invoices as paid**
 - **Mark invoices as delivered**
 - **Delete unpaid but expired invoices**
+- **Refund Invoices**
 
 ## File Structure
 
 ```
 LNPay-Backend/
+├── .env                # Environment variables (not included in repo)
+├── checkstatus.py      # Strike API integration for status checks
+├── convert.py          # USD to BTC conversion logic
+├── currencies.py       # Dictionary with apparently supported currencies from CoinGecko
+├── db.py               # SQLite database setup and queries
+├── expired_worker.py   # Worker script to check expired invoices and refund them if needed
+├── globalvariables.py  # Contain variables used in the whole project
+├── invoice.py          # Invoice generation and management
 ├── main.py             # Main Flask application
 ├── main_worker.py      # Worker script to check and update invoice statuses
-├── refund_worker.py    # Worker script to rerun refund attempts
-├── expired_worker.py   # Worker script to check expired invoices and refund them if needed
-├── refund_api.py       # Contain functions to initiate refunds
-├── db.py               # SQLite database setup and queries
-├── globalvariables.py  # Contain variables used in the whole project
-├── currencies.py       # Dictionary with apparently supported currencies from CoinGecko
-├── invoice.py          # Invoice generation and management
-├── qrcodeimage.py      # QR code generation
 ├── metadata.py         # Helper functions for metadata generation
-├── convert.py          # USD to BTC conversion logic
-├── checkstatus.py      # Strike API integration for status checks
-├── templates/
-│   └── qr_code.html    # HTML template for displaying QR codes
-├── .env                # Environment variables (not included in repo)
+├── qrcodeimage.py      # QR code generation
+├── refund_api.py       # Contain functions to initiate refunds
+├── refund_worker.py    # Worker script to rerun refund attempts
 ├── requirements.txt    # Python dependencies
-└── README.md           # Project documentation
+├── README.md           # Project documentation
+└── templates/
+    └── qr_code.html    # HTML template for displaying QR codes
 ```
 
 ## Notes
 
-- The `worker.py` script should be run alongside the Flask server to continuously update invoice statuses.
+- The `main_worker.py` script should be run alongside the Flask server to continuously update invoice statuses.
 - The database (`invoices.sqlite`) is created automatically if it does not exist when running `main.py`.
 
 ## License
