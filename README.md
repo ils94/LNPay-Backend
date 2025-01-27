@@ -63,12 +63,13 @@ To verify the status of invoices and update the database:
 Send a POST request to `/generate-invoice` with the desired amount:
 ```json
 {
-  "amount": 0.01
+  "amount": 0.01,
+  "ln_address": "costumerlightningaddressforrefundactions"
 }
 ```
 Curl
 ```
-curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount\": 0.01}"
+curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount\": 0.01, \"ln_address\": \"bitcoinfreak@walletofsatoshi.com\"}" > "%USERPROFILE%\Desktop\response.html"
 ```
 This will return:
 - Invoice details
