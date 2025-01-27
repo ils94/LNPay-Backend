@@ -21,15 +21,15 @@
 # SOFTWARE.
 
 import requests
-import globalvariables
+import global_variables
 
 
 # Function to call the Strike API to check an invoice state (paid or unpaid)
 def paid_invoice(invoice_id):
-    invoice_url = f'{globalvariables.base_url}/invoices/{invoice_id}'
+    invoice_url = f'{global_variables.base_url}/invoices/{invoice_id}'
 
     headers = {
-        'Authorization': f'Bearer {globalvariables.api_key}',
+        'Authorization': f'Bearer {global_variables.api_key}',
         'accept': 'application/json'
     }
 

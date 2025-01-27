@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import requests
-import globalvariables
+import global_variables
 
 
 # Functions to execute refunds
@@ -34,7 +34,7 @@ def create_payment_quote(lightning_address, amount):
     """
 
     headers = {
-        "Authorization": f"Bearer {globalvariables.api_key}",
+        "Authorization": f"Bearer {global_variables.api_key}",
         "Content-Type": "application/json"
     }
 
@@ -69,7 +69,7 @@ def execute_payment(quote_id):
     url = f"https://api.strike.me/v1/payment-quotes/{quote_id}/execute"
 
     headers = {
-        "Authorization": f"Bearer {globalvariables.api_key}",
+        "Authorization": f"Bearer {global_variables.api_key}",
         "Accept": "application/json"
     }
 

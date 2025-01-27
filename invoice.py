@@ -22,7 +22,7 @@
 
 import requests
 import convert
-import globalvariables
+import global_variables
 import metadata
 
 
@@ -31,16 +31,16 @@ import metadata
 # milliseconds was the best approach I came with)
 def generate(amount):
     # Convert the amount in USD to BTC
-    btc_amount = convert.fiat_to_btc(float(amount), globalvariables.currency)
+    btc_amount = convert.fiat_to_btc(float(amount), global_variables.currency)
 
     if not btc_amount:
-        raise Exception(f'Error converting {globalvariables.currency} to BTC')
+        raise Exception(f'Error converting {global_variables.currency} to BTC')
 
     correlation_id = metadata.generate_correlation_id()
     description = metadata.generate_description()
 
     # Generate the invoice using the API endpoints
-    invoice_endpoint = f'{globalvariables.base_url}/invoices'
+    invoice_endpoint = f'{global_variables.base_url}/invoices'
     quote_endpoint = f'{invoice_endpoint}/{{invoice_id}}/quote'
 
     invoice_data = {
@@ -53,7 +53,7 @@ def generate(amount):
     }
 
     headers = {
-        'Authorization': f'Bearer {globalvariables.api_key}',
+        'Authorization': f'Bearer {global_variables.api_key}',
         'Content-Type': 'application/json'
     }
 

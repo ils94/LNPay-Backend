@@ -22,7 +22,7 @@
 
 from flask import Flask, request, jsonify, render_template
 import invoice
-import qrcodeimage
+import qr_code_generator
 import db
 
 app = Flask(__name__)
@@ -41,7 +41,7 @@ def generate_invoice():
         invoice_json = invoice.generate(amount)
 
         # Generate a QR code for the invoice
-        qr_code_image_base64 = qrcodeimage.generate(invoice_json['quote']['lnInvoice'])
+        qr_code_image_base64 = qr_code_generator.generate(invoice_json['quote']['lnInvoice'])
 
         # Create the final response JSON
         response_data = {

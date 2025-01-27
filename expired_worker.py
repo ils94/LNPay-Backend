@@ -23,14 +23,14 @@
 import asyncio
 import db
 import refund_api
-import checkstatus
+import check_status
 
 
 # Same idea as the main_worker, but now with async
 async def process_invoice(invoice):
     """Processes a single invoice."""
     # Wrap synchronous calls in asyncio.to_thread
-    status = await asyncio.to_thread(checkstatus.paid_invoice, invoice)
+    status = await asyncio.to_thread(check_status.paid_invoice, invoice)
     print(f"{invoice} status: {status}")
 
     if status.upper() == 'PAID':

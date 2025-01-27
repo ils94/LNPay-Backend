@@ -22,7 +22,7 @@
 
 import sqlite3
 from datetime import datetime, timedelta
-import globalvariables
+import global_variables
 
 
 # Function to create the SQLite database and table
@@ -279,7 +279,7 @@ def is_invoice_valid(invoice_id):
         cursor = connection.cursor()
 
         # Get the current time in ISO 8601 format
-        current_time = (datetime.utcnow() + timedelta(minutes=globalvariables.expiration_offset)).strftime(
+        current_time = (datetime.utcnow() + timedelta(minutes=global_variables.expiration_offset)).strftime(
             '%Y-%m-%dT%H:%M:%SZ')
 
         # Query to check if the invoiceId is valid
