@@ -27,6 +27,7 @@ async def process_invoice(invoice):
         is_valid = await asyncio.to_thread(db.is_invoice_valid_one_hour, invoice)
 
         if not is_valid:
+            print(f"deleting {invoice}, expiration was due on Strike API side...")
             await asyncio.to_thread(db.delete_expired_invoice, invoice)
 
 
