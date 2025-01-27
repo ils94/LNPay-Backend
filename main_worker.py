@@ -23,7 +23,7 @@
 import asyncio
 import db
 import checkstatus
-import refund
+import refund_api
 
 
 # Main worker to check for unpaid invoices and expired invoices.
@@ -51,7 +51,7 @@ async def process_invoice(invoice):
             amount = await asyncio.to_thread(db.get_amount_by_invoice_id, invoice)
 
             # Wrap synchronous refund.is_success in asyncio.to_thread
-            is_success = await asyncio.to_thread(refund.is_success, refund_address, amount)
+            is_success = await asyncio.to_thread(refund_api.is_success, refund_address, amount)
 
             if is_success:
                 print(f"Deleting {invoice} from invoices database...")

@@ -22,7 +22,7 @@
 
 import asyncio
 import db
-import refund
+import refund_api
 import checkstatus
 
 
@@ -38,7 +38,7 @@ async def process_invoice(invoice):
         refund_address, amount = await asyncio.to_thread(db.get_expired_details, invoice)
 
         if refund_address and amount:
-            is_success = await asyncio.to_thread(refund.is_success, refund_address, amount)
+            is_success = await asyncio.to_thread(refund_api.is_success, refund_address, amount)
 
             if is_success:
                 print(f"Invoice {invoice} was successfully refunded!")
