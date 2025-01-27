@@ -109,7 +109,7 @@ LNPay-Backend/
 
 ## Notes
 
-- The `worker.py` script should be run alongside the Flask server to continuously update invoice statuses.
+- The `main_worker.py` script should be run alongside the Flask server to continuously update invoice statuses.
 - The database (`invoices.sqlite`) is created automatically if it does not exist when running `main.py`.
 
 ## License
