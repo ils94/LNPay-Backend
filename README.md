@@ -20,7 +20,7 @@ LNPay-Backend is a backend solution for handling Bitcoin Lightning Network payme
 
 1. Download the files:
    
-   https://github.com/ils94/LNPay-Backend/releases/download/release-v1/v1.zip
+   https://github.com/ils94/LNPay-Backend/releases/download/release-v2/v2.zip
 
 3. Create a virtual environment and install dependencies:
    ```bash
@@ -85,8 +85,12 @@ The following utility functions are available for managing invoices:
 ```
 LNPay-Backend/
 ├── main.py             # Main Flask application
-├── worker.py           # Worker script to check and update invoice statuses
+├── main_worker.py      # Worker script to check and update invoice statuses
+├── refund_worker.py    # Worker script to rerun refund attempts
+├── expired_worker.py   # Worker script to check expired invoices and refund them if needed
+├── refund_api.py       # Contain functions to initiate refunds
 ├── db.py               # SQLite database setup and queries
+├── globalvariables.py  # Contain variables used in the whole project
 ├── currencies.py       # Dictionary with apparently supported currencies from CoinGecko
 ├── invoice.py          # Invoice generation and management
 ├── qrcodeimage.py      # QR code generation
