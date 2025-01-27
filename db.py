@@ -402,6 +402,85 @@ def copy_to_expired(invoice_id):
         return f"Error: {e}"
 
 
+# Function to select all records from the expired table
+def get_all_expired():
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to select all records from the expired table
+        cursor.execute('''
+        SELECT * FROM expired
+        ''')
+
+        # Fetch all results
+        result = cursor.fetchall()
+        connection.close()
+
+        if result:
+            # Extract column 6 from all rows
+            column_6_values = [row[6] for row in result]
+            return column_6_values
+        else:
+            return []  # Return an empty list if no rows found
+    except Exception as e:
+        return f"Error: {e}"
+
+
+# Function to retrieve refund_address and amount from the expired table based on invoiceId
+def get_expired_details(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to get refund_address and amount from expired table for the given invoiceId
+        cursor.execute('''
+        SELECT refund_address, amount FROM expired WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            # Return both refund_address and amount as a tuple
+            return result[0], result[1]
+        else:
+            # Explicitly return None to handle no results
+            return None, None
+
+    except Exception as e:
+        return f"Error: {e}", None
+
+
+# Function to delete a row where the invoiceId matches. Good to clean the database of unpaid expired invoices
+def delete_expired_invoice(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Execute the DELETE query
+        cursor.execute('''
+        DELETE FROM expired WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Commit the changes
+        connection.commit()
+        affected_rows = cursor.rowcount
+        connection.close()
+
+        # Return the result
+        if affected_rows > 0:
+            return f"Invoice with ID {invoice_id} successfully deleted."
+        else:
+            return f"No invoice found with ID {invoice_id}."
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Function to copy a row to the refund_failure table based on invoiceId
 # You can run a refund again using only this table if necessary
 def copy_to_refund_failure(invoice_id):
@@ -457,7 +536,10 @@ def get_refund_failure_details(invoice_id):
 
         if result:
             # Return both refund_address and amount as a tuple
-            return {result[0], result[1]}
+            return result[0], result[1]
+        else:
+            # Explicitly return None to handle no results
+            return None, None
 
     except Exception as e:
         return f"Error: {e}"
@@ -470,7 +552,7 @@ def get_all_refund_failures():
         connection = sqlite3.connect("invoices.sqlite")
         cursor = connection.cursor()
 
-        # Query to select all records from refund_failure table
+        # Query to select all records from the expired table
         cursor.execute('''
         SELECT * FROM refund_failure
         ''')
@@ -480,8 +562,11 @@ def get_all_refund_failures():
         connection.close()
 
         if result:
-            # Return all records as a list of tuples
-            return result
+            # Extract column 6 from all rows
+            column_6_values = [row[6] for row in result]
+            return column_6_values
+        else:
+            return []  # Return an empty list if no rows found
     except Exception as e:
         return f"Error: {e}"
 

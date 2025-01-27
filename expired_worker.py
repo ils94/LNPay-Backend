@@ -1,22 +1,33 @@
 import asyncio
 import db
 import refund
+import checkstatus
 
 
 # Same idea as the main_worker, but now with async
 async def process_invoice(invoice):
     """Processes a single invoice."""
     # Wrap synchronous calls in asyncio.to_thread
-    refund_address, amount = await asyncio.to_thread(db.get_refund_failure_details, invoice)
+    status = await asyncio.to_thread(checkstatus.paid_invoice, invoice)
+    print(f"{invoice} status: {status}")
 
-    if refund_address and amount:
-        is_success = await asyncio.to_thread(refund.is_success, refund_address, amount)
+    if status.upper() == 'PAID':
 
-        if is_success:
-            print(f"Invoice {invoice} was successfully refunded!")
-            await asyncio.to_thread(db.delete_refund_failure_invoice, invoice)
-        else:
-            print(f"Failed to refund invoice {invoice}, trying again in the next cycle...")
+        refund_address, amount = await asyncio.to_thread(db.get_expired_details, invoice)
+
+        if refund_address and amount:
+            is_success = await asyncio.to_thread(refund.is_success, refund_address, amount)
+
+            if is_success:
+                print(f"Invoice {invoice} was successfully refunded!")
+                await asyncio.to_thread(db.delete_expired_invoice, invoice)
+            else:
+                print(f"Failed to refund invoice {invoice}, trying again in the next cycle...")
+    else:
+        is_valid = await asyncio.to_thread(db.is_invoice_valid_one_hour, invoice)
+
+        if not is_valid:
+            await asyncio.to_thread(db.delete_expired_invoice, invoice)
 
 
 async def process_batch(batch, wait_time):
@@ -32,7 +43,7 @@ async def rerun_refund():
     max_batch_size = 250
 
     while True:
-        invoices = await asyncio.to_thread(db.get_all_refund_failures)
+        invoices = await asyncio.to_thread(db.get_all_expired)
 
         if invoices:
             total_invoices = len(invoices)

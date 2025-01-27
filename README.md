@@ -51,7 +51,7 @@ This will:
 To verify the status of invoices and update the database:
 1. Run the `worker.py` script:
    ```bash
-   python worker.py
+   python main_worker.py
    ```
    The worker script:
    - Loops through all unpaid invoices.

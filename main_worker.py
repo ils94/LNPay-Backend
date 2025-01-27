@@ -4,8 +4,7 @@ import checkstatus
 import refund
 
 
-# Main worker to check for unpaid invoices and expired invoices. Now using Async programming for better multitasking
-# which increase the speed of invoice checking insanely fast.
+# Main worker to check for unpaid invoices and expired invoices.
 async def process_invoice(invoice):
     """Processes a single invoice."""
     # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
@@ -13,41 +12,40 @@ async def process_invoice(invoice):
     print(f"{invoice} status: {status}")
 
     if status.upper() == 'PAID':
-        is_valid = db.is_invoice_valid(invoice)
+        is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
 
         if is_valid:
-            db.set_invoice_paid(invoice)
-            delivered = db.get_delivered_status(invoice)
+            await asyncio.to_thread(db.set_invoice_paid, invoice)
+            delivered = await asyncio.to_thread(db.get_delivered_status, invoice)
 
             if delivered == 'NO':
                 print(f"Setting {invoice} as delivered.")
-
                 # Add your delivery logic here and update delivery status in the database
-                db.set_invoice_delivered(invoice)
+                await asyncio.to_thread(db.set_invoice_delivered, invoice)
         else:
             print(f"Refunding invoice because it was not paid in time: {invoice}")
 
-            refund_address = db.get_refund_address(invoice)
-            amount = db.get_amount_by_invoice_id(invoice)
+            refund_address = await asyncio.to_thread(db.get_refund_address, invoice)
+            amount = await asyncio.to_thread(db.get_amount_by_invoice_id, invoice)
 
             # Wrap synchronous refund.is_success in asyncio.to_thread
             is_success = await asyncio.to_thread(refund.is_success, refund_address, amount)
 
             if is_success:
                 print(f"Deleting {invoice} from invoices database...")
-                db.delete_invoice_by_id(invoice)
+                await asyncio.to_thread(db.delete_invoice_by_id, invoice)
             else:
                 print("Refund API failed. Moving invoice to refund_failure table...")
-                db.copy_to_refund_failure(invoice)
-                db.delete_invoice_by_id(invoice)
+                await asyncio.to_thread(db.copy_to_refund_failure, invoice)
+                await asyncio.to_thread(db.delete_invoice_by_id, invoice)
     else:
-        is_valid = db.is_invoice_valid(invoice)
+        is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
         print(f"Is invoice still valid: {is_valid}")
 
         if not is_valid:
             print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
-            db.copy_to_expired(invoice)
-            db.delete_invoice_by_id(invoice)
+            await asyncio.to_thread(db.copy_to_expired, invoice)
+            await asyncio.to_thread(db.delete_invoice_by_id, invoice)
 
 
 async def process_batch(batch, wait_time):
@@ -63,7 +61,8 @@ async def check_invoice_status():
     max_batch_size = 1000
 
     while True:
-        invoices = db.get_unpaid_invoices()
+        # Wrap this in asyncio.to_thread since it's a blocking call
+        invoices = await asyncio.to_thread(db.get_unpaid_invoices)
 
         if invoices:
             total_invoices = len(invoices)
