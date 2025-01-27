@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Coingecko supported currencies
-# Aparently, even tho Coingecko return those, many of them are actually not compatible
+# CoinGecko supported currencies
+# Aparently, even tho CoinGecko return those, many of them are actually not compatible
 
 fiat = {
     "usd": "United States Dollar",
