@@ -5,7 +5,7 @@ LNPay-Backend is a backend solution for handling Bitcoin Lightning Network payme
 ## Features
 
 - **Invoice Generation**: Automatically generate Bitcoin Lightning invoices using the Strike API.
-- **USD to BTC Conversion**: Convert amounts in USD to BTC using the CoinGecko API.
+- **Currency to BTC Conversion**: Convert amounts in supported currencies to BTC using the CoinGecko API.
 - **Invoice Management**: Store and manage invoice data in an SQLite database.
 - **Payment Verification**: Verify the status of Lightning invoices (paid or unpaid).
 - **Automated Status Updates**: Use a worker script to loop through and update invoice statuses and delivery status.
