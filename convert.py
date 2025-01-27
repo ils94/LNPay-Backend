@@ -20,7 +20,7 @@ def fiat_to_btc(amount, currency):
     current_time = time.time()
 
     # Check if 1:30 minutes (90 seconds) have passed since the last fetch
-    if current_time - last_fetch_time > 90 or cached_btc_price is None:
+    if current_time - last_fetch_time > 100 or cached_btc_price is None:
         url = f"https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies={currency}"
         response = requests.get(url)
         data = response.json()

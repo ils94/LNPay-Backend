@@ -45,12 +45,12 @@ async def rerun_refund():
 
                 for batch_index in range(0, total_invoices, max_batch_size):
                     batch = invoices[batch_index:batch_index + max_batch_size]
-                    wait_time = len(batch) * 0.40
+                    wait_time = len(batch) * 0.50
                     print(f"Processing batch {batch_index // max_batch_size + 1}/{num_batches}: {batch}")
 
                     await process_batch(batch, wait_time)
             else:
-                wait_time = total_invoices * 0.40
+                wait_time = total_invoices * 0.50
                 print(f"Processing all invoices in a single batch: {invoices}")
 
                 await process_batch(invoices, wait_time)
