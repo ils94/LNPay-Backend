@@ -1,26 +1,65 @@
+import asyncio
 import db
 import checkstatus
-import time
 import refund
 
 
-def check_invoice_status():
-    # Dynamically increases the wait time for using the Strike API based on the number of UNPAID invoices
-    # in the database. To prevent abuse by users generating a large number of invoices, you should check if
-    # the user already has a valid unpaid invoice. If so, replace the existing unpaid invoice with the newly
-    # generated one, or simply display the old unpaid invoice to the user.
+# Main worker to check for unpaid invoices and expired invoices. Now using Async programming for better multitasking
+# which increase the speed of invoice checking insanely fast.
+async def process_invoice(invoice):
+    """Processes a single invoice."""
+    # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
+    status = await asyncio.to_thread(checkstatus.paid_invoice, invoice)
+    print(f"{invoice} status: {status}")
 
-    # Allow the user to decide whether to delete the old invoice and generate a new one, or pay the existing one.
+    if status.upper() == 'PAID':
+        is_valid = db.is_invoice_valid(invoice)
 
-    # Additionally, show the user how much time is left to pay the current invoice.
+        if is_valid:
+            db.set_invoice_paid(invoice)
+            delivered = db.get_delivered_status(invoice)
 
-    # This worker will create batches up to 600 invoices and run each batch in cycles,
-    # expired invoices will be deleted (invoices has a lifetime of 1 hour).
+            if delivered == 'NO':
+                print(f"Setting {invoice} as delivered.")
 
-    # This project aims to create a generic backend so anyone can implement it in their projects.
-    # You should change the code based on your project needs.
+                # Add your delivery logic here and update delivery status in the database
+                db.set_invoice_delivered(invoice)
+        else:
+            print(f"Refunding invoice because it was not paid in time: {invoice}")
 
-    # Define the maximum batch size for API limits
+            refund_address = db.get_refund_address(invoice)
+            amount = db.get_amount_by_invoice_id(invoice)
+
+            # Wrap synchronous refund.is_success in asyncio.to_thread
+            is_success = await asyncio.to_thread(refund.is_success, refund_address, amount)
+
+            if is_success:
+                print(f"Deleting {invoice} from invoices database...")
+                db.delete_invoice_by_id(invoice)
+            else:
+                print("Refund API failed. Moving invoice to refund_failure table...")
+                db.copy_to_refund_failure(invoice)
+                db.delete_invoice_by_id(invoice)
+    else:
+        is_valid = db.is_invoice_valid(invoice)
+        print(f"Is invoice still valid: {is_valid}")
+
+        if not is_valid:
+            print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
+            db.copy_to_expired(invoice)
+            db.delete_invoice_by_id(invoice)
+
+
+async def process_batch(batch, wait_time):
+    """Processes a batch of invoices asynchronously."""
+    tasks = [process_invoice(invoice) for invoice in batch]
+    await asyncio.gather(*tasks)
+    print(f"Batch processed. Waiting {wait_time:.2f} seconds before next batch...")
+    await asyncio.sleep(wait_time)
+
+
+async def check_invoice_status():
+    """Main function to check and process unpaid invoices."""
     max_batch_size = 1000
 
     while True:
@@ -28,81 +67,28 @@ def check_invoice_status():
 
         if invoices:
             total_invoices = len(invoices)
-
             print(f"Total unpaid invoices: {total_invoices}")
             print(f"Invoices: {invoices}")
 
-            # If there are more invoices than the max batch size, split into batches
             if total_invoices > max_batch_size:
-                num_batches = (total_invoices + max_batch_size - 1) // max_batch_size  # Round up to cover all invoices
+                num_batches = (total_invoices + max_batch_size - 1) // max_batch_size
                 print(f"Splitting into {num_batches} batches.")
 
                 for batch_index in range(0, total_invoices, max_batch_size):
                     batch = invoices[batch_index:batch_index + max_batch_size]
-                    wait_time = len(batch) * 0.70  # Dynamic wait time based on batch size
+                    wait_time = len(batch) * 0.70
                     print(f"Processing batch {batch_index // max_batch_size + 1}/{num_batches}: {batch}")
 
-                    process_batch(batch)
-                    print(f"Waiting {wait_time:.2f} seconds before the next batch...")
-                    time.sleep(wait_time)
+                    await process_batch(batch, wait_time)
             else:
-                # If total invoices <= max_batch_size, process them all at once
-                wait_time = total_invoices * 0.70  # Dynamic wait time
+                wait_time = total_invoices * 0.70
                 print(f"Processing all invoices in a single batch: {invoices}")
 
-                process_batch(invoices)
-                print(f"Waiting {wait_time:.2f} seconds before the next cycle...")
-                time.sleep(wait_time)
+                await process_batch(invoices, wait_time)
         else:
-            # If no unpaid invoices are found, wait before checking again
             print("No unpaid invoices found. Waiting...")
-            time.sleep(1)  # Default wait time if no invoices are found
+            await asyncio.sleep(1)
 
 
-def process_batch(batch):
-    """Processes a batch of invoices."""
-    for invoice in batch:
-        status = checkstatus.paid_invoice(invoice)
-        print(f"{invoice} status: {status}")
-
-        if status.upper() == 'PAID':
-            is_valid = db.is_invoice_valid(invoice)
-
-            if is_valid:
-                db.set_invoice_paid(invoice)
-                delivered = db.get_delivered_status(invoice)
-
-                if delivered == 'NO':
-                    print(f"Setting {invoice} as delivered.")
-
-                    # Add here your logic to delivery your product and change the delivery status on
-                    # your local database after
-
-                    db.set_invoice_delivered(invoice)
-            else:
-                print(f"refunding invoice because it was not paid in time {invoice}")
-
-                refund_address = db.get_refund_address(invoice)
-                amount = db.get_amount_by_invoice_id(invoice)
-
-                is_success = refund.is_success(refund_address, amount)
-
-                if is_success:
-                    print(f"Deleting {invoice} from invoices database...")
-                    db.delete_invoice_by_id(invoice)
-                else:
-                    # This will only happen if something very wrong happened
-                    print("Something wrong with the refund API, check it asap! Moving invoice to refund_failure table")
-                    db.copy_to_refund_failure(invoice)
-                    db.delete_invoice_by_id(invoice)
-        else:
-            is_valid = db.is_invoice_valid(invoice)
-            print(f"Is invoice still valid: {is_valid}")
-
-            if not is_valid:
-                print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
-                db.copy_to_expired(invoice)
-                db.delete_invoice_by_id(invoice)
-
-
-check_invoice_status()
+# Run the asyncio event loop
+asyncio.run(check_invoice_status())
