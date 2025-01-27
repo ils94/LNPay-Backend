@@ -81,6 +81,7 @@ The following utility functions are available for managing invoices:
 - **Mark invoices as paid**
 - **Mark invoices as delivered**
 - **Delete unpaid but expired invoices**
+- **Refund Invoices**
 
 ## File Structure
 
