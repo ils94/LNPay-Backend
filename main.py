@@ -24,6 +24,7 @@ from flask import Flask, request, jsonify, render_template
 import invoice
 import qr_code_generator
 import db
+import webhook_signature
 
 app = Flask(__name__)
 
@@ -71,6 +72,43 @@ def generate_invoice():
     except Exception as e:
         print("Error:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# Need a public server to test this one
+@app.route('/webhook', methods=['POST'])
+def strike_webhook():
+    """
+    Endpoint to handle "invoice.updated" events from Strike.
+    """
+    try:
+        # Get the raw request body
+        raw_data = request.get_data()
+
+        # Get the signature from the headers
+        signature = request.headers.get('Strike-Signature', '')
+
+        # Verify the signature
+        if not webhook_signature.verify(raw_data, signature):
+            return jsonify({'error': 'Invalid signature'}), 400
+
+        # Parse the JSON payload
+        event_data = request.json
+
+        # Only handle "invoice.updated" events
+        if event_data.get('eventType') == 'invoice.updated':
+            print("Invoice updated:", event_data)
+
+            # Process the event (e.g., update your database)
+            # Add your logic here
+
+            return jsonify({'status': 'success'}), 200
+
+        # Ignore other events
+        return jsonify({'message': 'Event ignored'}), 200
+
+    except Exception as e:
+        print(f"Error handling webhook: {e}")
+        return jsonify({'error': 'Webhook handling failed'}), 500
 
 
 if __name__ == '__main__':
