@@ -50,7 +50,7 @@ This will:
 
 ### 2. Verifying Invoice Status
 To verify the status of invoices and update the database:
-1. Run the `worker.py` script:
+1. Run the `main_worker.py` script:
    ```bash
    python main_worker.py
    ```
