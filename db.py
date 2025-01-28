@@ -334,18 +334,15 @@ def is_invoice_valid_one_hour(invoice_id):
         return f"Error: {e}"
 
 
-def get_refund_address(invoice_id):
-    """
-    Retrieve the refund address for a specific invoice ID.
-    """
+def get_refund_details(invoice_id):
     try:
         # Connect to the database
         connection = sqlite3.connect("invoices.sqlite")
         cursor = connection.cursor()
 
-        # Query to get the refund_address for the given invoiceId
+        # Query to get refund_address and amount from refund_failure table for the given invoiceId
         cursor.execute('''
-        SELECT refund_address FROM invoices WHERE invoiceId = ?
+        SELECT refund_address, amount FROM invoices WHERE invoiceId = ?
         ''', (invoice_id,))
 
         # Fetch the result
@@ -353,37 +350,12 @@ def get_refund_address(invoice_id):
         connection.close()
 
         if result:
-            # Return the refund address
-            return result[0]
+            # Return both refund_address and amount as a tuple
+            return result[0], result[1]
         else:
-            return f"No refund address found for invoice ID {invoice_id}."
-    except Exception as e:
-        return f"Error: {e}"
+            # Explicitly return None to handle no results
+            return None, None
 
-
-def get_amount_by_invoice_id(invoice_id):
-    """
-    Retrieve the amount for a specific invoice ID.
-    """
-    try:
-        # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
-        cursor = connection.cursor()
-
-        # Query to get the amount for the given invoiceId
-        cursor.execute('''
-        SELECT amount FROM invoices WHERE invoiceId = ?
-        ''', (invoice_id,))
-
-        # Fetch the result
-        result = cursor.fetchone()
-        connection.close()
-
-        if result:
-            # Return the amount
-            return result[0]
-        else:
-            return f"No amount found for invoice ID {invoice_id}."
     except Exception as e:
         return f"Error: {e}"
 

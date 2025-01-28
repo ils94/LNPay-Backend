@@ -26,7 +26,7 @@ import check_status
 import refund_api
 
 
-# Main worker to check for unpaid invoices and expired invoices.
+# Use this to check the receive invoice from the webhook
 async def process_invoice(invoice):
     """Processes a single invoice."""
     # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
@@ -67,48 +67,3 @@ async def process_invoice(invoice):
             print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
             await asyncio.to_thread(db.copy_to_expired, invoice)
             await asyncio.to_thread(db.delete_invoice_by_id, invoice)
-
-
-async def process_batch(batch, wait_time):
-    """Processes a batch of invoices asynchronously."""
-    tasks = [process_invoice(invoice) for invoice in batch]
-    await asyncio.gather(*tasks)
-    print(f"Batch processed. Waiting {wait_time:.2f} seconds before next batch...")
-    await asyncio.sleep(wait_time)
-
-
-async def check_invoice_status():
-    """Main function to check and process unpaid invoices."""
-    max_batch_size = 1000
-
-    while True:
-        # Wrap this in asyncio.to_thread since it's a blocking call
-        invoices = await asyncio.to_thread(db.get_unpaid_invoices)
-
-        if invoices:
-            total_invoices = len(invoices)
-            print(f"Total unpaid invoices: {total_invoices}")
-            print(f"Invoices: {invoices}")
-
-            if total_invoices > max_batch_size:
-                num_batches = (total_invoices + max_batch_size - 1) // max_batch_size
-                print(f"Splitting into {num_batches} batches.")
-
-                for batch_index in range(0, total_invoices, max_batch_size):
-                    batch = invoices[batch_index:batch_index + max_batch_size]
-                    wait_time = len(batch) * 1
-                    print(f"Processing batch {batch_index // max_batch_size + 1}/{num_batches}: {batch}")
-
-                    await process_batch(batch, wait_time)
-            else:
-                wait_time = total_invoices * 1
-                print(f"Processing all invoices in a single batch: {invoices}")
-
-                await process_batch(invoices, wait_time)
-        else:
-            print("No unpaid invoices found. Waiting...")
-            await asyncio.sleep(1)
-
-
-# Run the asyncio event loop
-asyncio.run(check_invoice_status())
