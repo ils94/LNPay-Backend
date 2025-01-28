@@ -11,4 +11,4 @@ def generate_random_key(length):
 # You can use this script to generate a random 10 + character length key to create webhook subscriptions
 # Your key must be 10 in length, otherwise, Strike will return an error
 # No idea of the maximum size limit, but you can test it if you want :)
-generate_random_key(10)
+print(generate_random_key(10))
