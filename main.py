@@ -93,7 +93,7 @@ def strike_webhook():
         raw_data = request.get_data()
 
         # Get the signature from the headers
-        signature = request.headers.get('Strike-Signature', '')
+        signature = request.headers.get('X-Webhook-Signature', '')
 
         # Verify the signature
         if not webhook_signature.verify(raw_data, signature):

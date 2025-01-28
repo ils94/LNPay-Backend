@@ -32,7 +32,7 @@ api_key = os.getenv("STRIKE_API_KEY")
 
 webhook_secret = os.getenv("WEBHOOK_SECRET")
 
-webhook_url = "https://yourdomain.com/webhook"
+webhook_url = os.getenv("WEBHOOK_URL")
 
 currency = "usd"
 
