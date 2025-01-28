@@ -26,9 +26,8 @@ import check_status
 import refund_api
 
 
-# Use this to check the receive invoice from the webhook
-async def process_invoice(invoice):
-    """Processes a single invoice."""
+# Use this to check the received invoice from the webhook
+async def check_state(invoice):
     # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
     status = await asyncio.to_thread(check_status.paid_invoice, invoice)
     print(f"{invoice} status: {status}")
@@ -38,11 +37,14 @@ async def process_invoice(invoice):
 
         if is_valid:
             await asyncio.to_thread(db.set_invoice_paid, invoice)
+
             delivered = await asyncio.to_thread(db.get_delivered_status, invoice)
 
             if delivered == 'NO':
                 print(f"Setting {invoice} as delivered.")
+
                 # Add your delivery logic here and update delivery status in the database
+
                 await asyncio.to_thread(db.set_invoice_delivered, invoice)
         else:
             print(f"Refunding invoice because it was not paid in time: {invoice}")
