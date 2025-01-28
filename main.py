@@ -48,13 +48,16 @@ async def generate_invoice():
         # Generate a QR code for the invoice
         qr_code_image_base64 = await asyncio.to_thread(qr_code_generator.generate, invoice_json['quote']['lnInvoice'])
 
+        time = 60 - global_variables.expiration_offset
+
         # Create the final response JSON
         response_data = {
             "status": "success",
             "data": {
                 "invoice": invoice_json["invoice"],
                 "quote": invoice_json["quote"],
-                "qr_code": qr_code_image_base64
+                "qr_code": qr_code_image_base64,
+                "expiration_time": time
             }
         }
 
@@ -69,8 +72,6 @@ async def generate_invoice():
 
         # Return the JSON response
         # return jsonify(response_data), 200
-
-        time = 60 - global_variables.expiration_offset
 
         return render_template('qr_code.html', time=time, amount_sats=invoice_json['quote']['sourceAmount']['amount'],
                                qr_code=qr_code_image_base64, invoice=invoice_json['quote']['lnInvoice'])
@@ -99,7 +100,7 @@ async def strike_webhook():
         raw_data = request.get_data()
 
         # Get the signature from the headers
-        signature = request.headers.get('X-Webhook-Signature', '')
+        signature = request.headers.get('X-Webhook-Signature', '').upper()
 
         # Verify the signature
         if not webhook_signature.verify_request_signature(raw_data, signature, global_variables.webhook_secret):
