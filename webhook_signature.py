@@ -36,7 +36,4 @@ def verify_request_signature(raw_data, signature, secret):
     """Verify the request's signature."""
     computed_signature = compute_hmac(raw_data, secret)
 
-    print(f"Computed HMAC: {computed_signature}")  # Debug line
-    print(f"Provided Signature: {signature}")  # Debug line
-
     return hmac.compare_digest(computed_signature, signature)

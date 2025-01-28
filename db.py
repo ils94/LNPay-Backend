@@ -147,6 +147,34 @@ def get_unpaid_invoices():
         return f"Error: {e}"
 
 
+# Function to check if a given invoice ID has the state 'PAID'
+def is_invoice_paid(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect("invoices.sqlite")
+        cursor = connection.cursor()
+
+        # Query to check if the invoice state is 'PAID' for the given invoice ID
+        cursor.execute('''SELECT state FROM invoices WHERE invoiceId = ?''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            # If the result is found, return if the state is 'PAID'
+            if result[0] == 'PAID':
+                return True
+            else:
+                return False
+        else:
+            # If no invoice with that ID is found
+            return False
+
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Function to set the state of an invoice to 'PAID'
 def set_invoice_paid(invoice_id):
     try:

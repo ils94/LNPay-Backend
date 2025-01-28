@@ -24,6 +24,7 @@ import asyncio
 import db
 import check_status
 import refund_api
+import delivery
 
 
 # Main worker to check for unpaid invoices and expired invoices.
@@ -42,7 +43,9 @@ async def process_invoice(invoice):
 
             if delivered == 'NO':
                 print(f"Setting {invoice} as delivered.")
-                # Add your delivery logic here and update delivery status in the database
+
+                await delivery.logic()
+
                 await asyncio.to_thread(db.set_invoice_delivered, invoice)
         else:
             print(f"Refunding invoice because it was not paid in time: {invoice}")

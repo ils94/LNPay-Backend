@@ -89,7 +89,7 @@ async def rerun_refund():
 
                 await process_batch(invoices, wait_time)
         else:
-            print("No invoices to refund. Waiting...")
+            print("No expired invoices. Waiting...")
             await asyncio.sleep(1)  # Default wait time if no invoices are found
 
 

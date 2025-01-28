@@ -24,48 +24,59 @@ import asyncio
 import db
 import check_status
 import refund_api
+import delivery
 
 
 # Use this to check the received invoice from the webhook
 async def check_state(invoice):
-    # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
+    is_paid = await asyncio.to_thread(db.is_invoice_paid, invoice)
+
+    if is_paid:
+        print(f"{invoice} was already processed.")
+        return
+
     status = await asyncio.to_thread(check_status.paid_invoice, invoice)
     print(f"{invoice} status: {status}")
 
-    if status.upper() == 'PAID':
-        is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
+    if status.upper() != 'PAID':
+        return  # Skip further processing if not paid
 
-        if is_valid:
-            await asyncio.to_thread(db.set_invoice_paid, invoice)
+    is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
 
-            delivered = await asyncio.to_thread(db.get_delivered_status, invoice)
+    if not is_valid:
+        await handle_failed_invoice(invoice)
+        return
 
-            if delivered == 'NO':
-                print(f"Setting {invoice} as delivered.")
+    await process_paid_invoice(invoice)
 
-                # Add your delivery logic here and update delivery status in the database
 
-                await asyncio.to_thread(db.set_invoice_delivered, invoice)
-        else:
-            print(f"Refunding invoice because it was not paid in time: {invoice}")
+async def handle_failed_invoice(invoice):
+    print(f"Refunding invoice because it was not paid in time: {invoice}")
 
-            refund_address, amount = await asyncio.to_thread(db.get_refund_details, invoice)
+    refund_address, amount = await asyncio.to_thread(db.get_refund_details, invoice)
 
-            # Wrap synchronous refund.is_success in asyncio.to_thread
-            is_success = await asyncio.to_thread(refund_api.is_success, refund_address, amount)
+    is_success = await asyncio.to_thread(refund_api.is_success, refund_address, amount)
 
-            if is_success:
-                print(f"Deleting {invoice} from invoices database...")
-                await asyncio.to_thread(db.delete_invoice_by_id, invoice)
-            else:
-                print("Refund API failed. Moving invoice to refund_failure table...")
-                await asyncio.to_thread(db.copy_to_refund_failure, invoice)
-                await asyncio.to_thread(db.delete_invoice_by_id, invoice)
+    if is_success:
+        print(f"Deleting {invoice} from invoices database...")
+
+        await asyncio.to_thread(db.delete_invoice_by_id, invoice)
+
     else:
-        is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
-        print(f"Is invoice still valid: {is_valid}")
+        print("Refund API failed. Moving invoice to refund_failure table...")
 
-        if not is_valid:
-            print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
-            await asyncio.to_thread(db.copy_to_expired, invoice)
-            await asyncio.to_thread(db.delete_invoice_by_id, invoice)
+        await asyncio.to_thread(db.copy_to_refund_failure, invoice)
+        await asyncio.to_thread(db.delete_invoice_by_id, invoice)
+
+
+async def process_paid_invoice(invoice):
+    await asyncio.to_thread(db.set_invoice_paid, invoice)
+
+    delivered = await asyncio.to_thread(db.get_delivered_status, invoice)
+
+    if delivered == 'NO':
+        print(f"Setting {invoice} as delivered.")
+
+        await delivery.logic()
+
+        await asyncio.to_thread(db.set_invoice_delivered, invoice)

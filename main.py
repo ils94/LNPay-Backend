@@ -27,13 +27,15 @@ import invoice
 import qr_code_generator
 import db
 import webhook_signature
+import asyncio
+import webhook_invoice
 
 app = Flask(__name__)
 
 
 # Main endpoint for the backend. This will generate the invoice after receiving an amount
 @app.route('/generate-invoice', methods=['POST'])
-def generate_invoice():
+async def generate_invoice():
     try:
         # Extract the amount or other data from the request if needed
         data = request.get_json()
@@ -41,10 +43,10 @@ def generate_invoice():
         ln_address = data.get("ln_address")
 
         # Call the generate function.
-        invoice_json = invoice.generate(amount)
+        invoice_json = await asyncio.to_thread(invoice.generate, amount)
 
         # Generate a QR code for the invoice
-        qr_code_image_base64 = qr_code_generator.generate(invoice_json['quote']['lnInvoice'])
+        qr_code_image_base64 = await asyncio.to_thread(qr_code_generator.generate, invoice_json['quote']['lnInvoice'])
 
         # Create the final response JSON
         response_data = {
@@ -57,7 +59,7 @@ def generate_invoice():
         }
 
         # Insert the relevant data of the invoice into a database for future use
-        db.insert_invoice(response_data, ln_address)
+        await asyncio.to_thread(db.insert_invoice, response_data, ln_address)
 
         # Here you can choose what type of data you want to return
 
@@ -86,7 +88,7 @@ def generate_invoice():
 # You will still need to use check_status.py to determine the actual state of the invoice.
 
 @app.route('/webhook', methods=['POST'])
-def strike_webhook():
+async def strike_webhook():
     """
     Endpoint to handle "invoice.updated" events from Strike.
     """
@@ -107,10 +109,11 @@ def strike_webhook():
 
         # Only handle "invoice.updated" events
         if event_data.get('eventType') == 'invoice.updated':
-            print("Invoice updated:", event_data)
 
-            # Process the event (e.g., update your database)
-            # Add your logic here
+            entity_id = event_data.get('data', {}).get('entityId')
+
+            # start the invoice processing
+            await webhook_invoice.check_state(entity_id)
 
             return jsonify({'status': 'success'}), 200
 
