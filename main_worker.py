@@ -28,6 +28,7 @@ import delivery
 
 
 # Main worker to check for unpaid invoices and expired invoices.
+# You can run both main_worker and have the webhook set if you want. But You should only run one.
 async def process_invoice(invoice):
     """Processes a single invoice."""
     # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
