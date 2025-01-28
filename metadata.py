@@ -36,8 +36,8 @@ def generate_correlation_id():
 
 
 def generate_description():
-    description = ""
-
     # Your logic to generate a description for your invoices here
+
+    description = "some random description"
 
     return description
