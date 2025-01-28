@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 from flask import Flask, request, jsonify, render_template
+
+import global_variables
 import invoice
 import qr_code_generator
 import db
@@ -96,7 +98,7 @@ def strike_webhook():
         signature = request.headers.get('X-Webhook-Signature', '')
 
         # Verify the signature
-        if not webhook_signature.verify(raw_data, signature):
+        if not webhook_signature.verify_request_signature(raw_data, signature, global_variables.webhook_secret):
             return jsonify({'error': 'Invalid signature'}), 400
 
         # Parse the JSON payload

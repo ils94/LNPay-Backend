@@ -20,18 +20,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import hmac
 import hashlib
-import global_variables
+import hmac
+import json
 
 
-def verify(data, signature):
-    """
-    Verifies the HMAC SHA256 signature of the incoming webhook request.
-    """
-    computed_signature = hmac.new(
-        global_variables.webhook_secret.encode(),
-        data,
-        hashlib.sha256
-    ).hexdigest()
-    return hmac.compare_digest(computed_signature, signature)
+# No idea if it will work
+def compute_hmac(content, secret):
+    """Compute the HMAC SHA-256 for the given content and secret."""
+    hmac_instance = hmac.new(secret.encode('utf-8'), content, hashlib.sha256)
+    return hmac_instance.hexdigest()
+
+
+def get_raw_body(body):
+    """Convert the body to a raw byte array."""
+    body_str = json.dumps(body)
+    return bytearray(body_str, 'utf-8')
+
+
+def verify_request_signature(raw_data, signature, secret):
+    """Verify the request's signature."""
+    signature_bytes = signature.encode('utf-8')
+
+    content_signature = compute_hmac(raw_data, secret)
+    content_signature_bytes = content_signature.encode('utf-8')
+
+    # Use hmac.compare_digest for a timing-safe comparison
+    return hmac.compare_digest(signature_bytes, content_signature_bytes)
