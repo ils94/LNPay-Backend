@@ -22,28 +22,21 @@
 
 import hashlib
 import hmac
-import json
 
 
-# No idea if it will work
+# Yes, it works.
 def compute_hmac(content, secret):
     """Compute the HMAC SHA-256 for the given content and secret."""
-    hmac_instance = hmac.new(secret.encode('utf-8'), content, hashlib.sha256)
-    return hmac_instance.hexdigest()
-
-
-def get_raw_body(body):
-    """Convert the body to a raw byte array."""
-    body_str = json.dumps(body)
-    return bytearray(body_str, 'utf-8')
+    # I CAN'T FUCKING BELIVE THAT THIS SHIT HERE RETURNS THE THINGY IN LOWER CASE!
+    # STRIKE SENDS THE SIGNATURE IN UPPER CASE!
+    return hmac.new(secret.encode('utf-8'), content, hashlib.sha256).hexdigest().upper()
 
 
 def verify_request_signature(raw_data, signature, secret):
     """Verify the request's signature."""
-    signature_bytes = signature.encode('utf-8')
+    computed_signature = compute_hmac(raw_data, secret)
 
-    content_signature = compute_hmac(raw_data, secret)
-    content_signature_bytes = content_signature.encode('utf-8')
+    print(f"Computed HMAC: {computed_signature}")  # Debug line
+    print(f"Provided Signature: {signature}")  # Debug line
 
-    # Use hmac.compare_digest for a timing-safe comparison
-    return hmac.compare_digest(signature_bytes, content_signature_bytes)
+    return hmac.compare_digest(computed_signature, signature)

@@ -99,6 +99,7 @@ def strike_webhook():
 
         # Verify the signature
         if not webhook_signature.verify_request_signature(raw_data, signature, global_variables.webhook_secret):
+            print("Signature verify error...")
             return jsonify({'error': 'Invalid signature'}), 400
 
         # Parse the JSON payload
