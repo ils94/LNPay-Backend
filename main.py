@@ -70,7 +70,9 @@ async def generate_invoice():
         # Return the JSON response
         # return jsonify(response_data), 200
 
-        return render_template('qr_code.html', amount_sats=invoice_json['quote']['sourceAmount']['amount'],
+        time = 60 - global_variables.expiration_offset
+
+        return render_template('qr_code.html', time=time, amount_sats=invoice_json['quote']['sourceAmount']['amount'],
                                qr_code=qr_code_image_base64, invoice=invoice_json['quote']['lnInvoice'])
 
     except Exception as e:
