@@ -102,3 +102,35 @@ def list_subscriptions():
     else:
         print(f"Failed to fetch subscriptions: {response.status_code}")
         print(response.text)
+
+
+# Use this function to update one of yours subs
+# Good if you leaked your webhook secret somehow... Noob.
+def update_subscription(subscription_id):
+    url = f"https://api.strike.me/v1/subscriptions/{subscription_id}"
+
+    payload = json.dumps({
+        "webhookUrl": global_variables.webhook_url,
+        "webhookVersion": "v1",
+        "secret": global_variables.webhook_secret,
+        "enabled": True,
+        "eventTypes": [
+            "invoice.updated"
+        ]
+    })
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': f"Bearer {global_variables.api_key}"
+    }
+
+    response = requests.request("PATCH", url, headers=headers, data=payload)
+
+    # Handle response
+    if response.status_code == 200:
+        print("Subscription updated successfully.")
+        print(response.json())  # Print the updated subscription details
+    else:
+        print(f"Failed to update subscription: {response.status_code}")
+        print(response.text)
