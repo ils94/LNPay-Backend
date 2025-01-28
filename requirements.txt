@@ -1,4 +1,4 @@
-flask
+flask[async]
 qrcode[pil]
 requests
 python-dotenv
