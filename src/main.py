@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 from flask import Flask, request, jsonify, render_template
-
 from src.config import global_variables
 from src.services import invoice
 from src.utils import qr_code_generator
@@ -63,17 +62,11 @@ async def generate_invoice():
         # Insert the relevant data of the invoice into a database for future use
         await asyncio.to_thread(db.insert_invoice, response_data, ln_address)
 
-        # Here you can choose what type of data you want to return
-
-        # The response_data contains all the information of both invoice json and quote json as well as the qr code
-        # base64. the render_template returns a qr_code.html containing the qr code to be scanned, the value in BTC
-        # and the invoice string (for manual pasting into the app to send the BTC).
-
         # Return the JSON response
-        # return jsonify(response_data), 200
+        return jsonify(response_data), 200
 
-        return render_template('qr_code.html', time=time, amount_sats=invoice_json['quote']['sourceAmount']['amount'],
-                               qr_code=qr_code_image_base64, invoice=invoice_json['quote']['lnInvoice'])
+        # return render_template('qr_code.html', time=time, amount_sats=invoice_json['quote']['sourceAmount']['amount'],
+        #                        qr_code=qr_code_image_base64, invoice=invoice_json['quote']['lnInvoice'])
 
     except Exception as e:
         print("Error:", e)
