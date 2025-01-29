@@ -144,36 +144,6 @@ You can use `key_generator.py` to generate a random 10 length string to use as y
 ### 7. Customize Delivery Logic
 Update `delivery.py` to include your custom logic for handling invoice delivery.
 
-## File Structure
-
-```
-LNPay-Backend/
-├── .env                      # Environment variables (not included in repo)
-├── LICENSE                   # MIT
-├── README.md                 # Project documentation
-├── checkstatus.py            # Strike API integration for status checks
-├── convert.py                # Currency to BTC conversion logic
-├── currencies.py             # Supported currencies from CoinGecko
-├── db.py                     # SQLite database setup and queries
-├── delivery.py               # Custom logic for invoice delivery
-├── expired_worker.py         # Worker script to check expired invoices and refund them
-├── global_variables.py       # Global variables for the project
-├── invoice.py                # Invoice generation and management
-├── key_generator.py          # Generate a random 10+ length key to use as your webhook secret
-├── main.py                   # Main Flask application
-├── main_worker.py            # Worker script to update invoice statuses
-├── metadata.py               # Metadata generation helpers
-├── qr_code_generator.py      # QR code generation logic
-├── refund_api.py             # Functions for initiating refunds
-├── refund_failure_worker.py  # Worker script to retry refund attempts
-├── requirements.txt          # Python dependencies
-├── webhook_invoice.py        # Logic to process payments via webhook
-├── webhook_signature.py      # Verifies webhook signatures
-├── webhook_subscription.py   # Webhook subscription management
-└── templates/
-    └── qr_code.html          # HTML template for displaying QR codes
-```
-
 ## Notes
 
 - The `main_worker.py` script should be run alongside the Flask server to continuously update invoice statuses unless you are relying solely on webhooks.
