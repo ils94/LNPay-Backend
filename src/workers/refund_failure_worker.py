@@ -21,8 +21,8 @@
 # SOFTWARE.
 
 import asyncio
-import db
-import refund_api
+from src.database import db
+from src.services import refund_api
 
 
 # Same idea as the main_worker, but now with async

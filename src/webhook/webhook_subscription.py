@@ -22,7 +22,7 @@
 
 import requests
 import json
-import global_variables
+from src.config import global_variables
 
 
 # To be able to receive POST on your webhook from Strike API, you have to run this function first

@@ -36,4 +36,4 @@ webhook_url = os.getenv("WEBHOOK_URL")
 
 currency = "usd"
 
-expiration_offset = 45
+expiration_offset = 59

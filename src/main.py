@@ -22,13 +22,12 @@
 
 from flask import Flask, request, jsonify, render_template
 
-import global_variables
-import invoice
-import qr_code_generator
-import db
-import webhook_signature
+from src.config import global_variables
+from src.services import invoice
+from src.utils import qr_code_generator
+from src.database import db
+from src.webhook import webhook_signature, webhook_invoice
 import asyncio
-import webhook_invoice
 
 app = Flask(__name__)
 
@@ -112,7 +111,6 @@ async def strike_webhook():
 
         # Only handle "invoice.updated" events
         if event_data.get('eventType') == 'invoice.updated':
-
             entity_id = event_data.get('data', {}).get('entityId')
 
             # start the invoice processing

@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import requests
-import global_variables
+from src.config import global_variables
 
 
 # Functions to execute refunds

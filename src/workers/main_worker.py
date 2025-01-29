@@ -21,36 +21,55 @@
 # SOFTWARE.
 
 import asyncio
-import db
-import refund_api
-import check_status
+from src.database import db
+from src.services import check_status, refund_api
+from src.config import delivery
 
 
-# Same idea as the main_worker, but now with async
+# Main worker to check for unpaid invoices and expired invoices.
+# You can run both main_worker and have the webhook set if you want. But You should only run one.
 async def process_invoice(invoice):
     """Processes a single invoice."""
-    # Wrap synchronous calls in asyncio.to_thread
+    # Wrap the synchronous call in asyncio.to_thread to make it non-blocking
     status = await asyncio.to_thread(check_status.paid_invoice, invoice)
     print(f"{invoice} status: {status}")
 
     if status.upper() == 'PAID':
+        is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
 
-        refund_address, amount = await asyncio.to_thread(db.get_expired_details, invoice)
+        if is_valid:
+            await asyncio.to_thread(db.set_invoice_paid, invoice)
+            delivered = await asyncio.to_thread(db.get_delivered_status, invoice)
 
-        if refund_address and amount:
+            if delivered == 'NO':
+                print(f"Setting {invoice} as delivered.")
+
+                await delivery.logic()
+
+                await asyncio.to_thread(db.set_invoice_delivered, invoice)
+        else:
+            print(f"Refunding invoice because it was not paid in time: {invoice}")
+
+            refund_address, amount = await asyncio.to_thread(db.get_refund_details, invoice)
+
+            # Wrap synchronous refund.is_success in asyncio.to_thread
             is_success = await asyncio.to_thread(refund_api.is_success, refund_address, amount)
 
             if is_success:
-                print(f"Invoice {invoice} was successfully refunded!")
-                await asyncio.to_thread(db.delete_expired_invoice, invoice)
+                print(f"Deleting {invoice} from invoices database...")
+                await asyncio.to_thread(db.delete_invoice_by_id, invoice)
             else:
-                print(f"Failed to refund invoice {invoice}, trying again in the next cycle...")
+                print("Refund API failed. Moving invoice to refund_failure table...")
+                await asyncio.to_thread(db.copy_to_refund_failure, invoice)
+                await asyncio.to_thread(db.delete_invoice_by_id, invoice)
     else:
-        is_valid = await asyncio.to_thread(db.is_invoice_valid_one_hour, invoice)
+        is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
+        print(f"Is invoice still valid: {is_valid}")
 
         if not is_valid:
-            print(f"Deleting {invoice}, as its expiration was due on the Strike API side...")
-            await asyncio.to_thread(db.delete_expired_invoice, invoice)
+            print(f"Invoice {invoice} is UNPAID and expired. Moving to expired table...")
+            await asyncio.to_thread(db.copy_to_expired, invoice)
+            await asyncio.to_thread(db.delete_invoice_by_id, invoice)
 
 
 async def process_batch(batch, wait_time):
@@ -61,16 +80,17 @@ async def process_batch(batch, wait_time):
     await asyncio.sleep(wait_time)
 
 
-async def rerun_refund():
-    """Main function to rerun refund processes."""
-    max_batch_size = 250
+async def check_invoice_status():
+    """Main function to check and process unpaid invoices."""
+    max_batch_size = 1000
 
     while True:
-        invoices = await asyncio.to_thread(db.get_all_expired)
+        # Wrap this in asyncio.to_thread since it's a blocking call
+        invoices = await asyncio.to_thread(db.get_unpaid_invoices)
 
         if invoices:
             total_invoices = len(invoices)
-            print(f"Total invoices to refund: {total_invoices}")
+            print(f"Total unpaid invoices: {total_invoices}")
             print(f"Invoices: {invoices}")
 
             if total_invoices > max_batch_size:
@@ -89,9 +109,9 @@ async def rerun_refund():
 
                 await process_batch(invoices, wait_time)
         else:
-            print("No expired invoices. Waiting...")
-            await asyncio.sleep(1)  # Default wait time if no invoices are found
+            print("No unpaid invoices found. Waiting...")
+            await asyncio.sleep(1)
 
 
 # Run the asyncio event loop
-asyncio.run(rerun_refund())
+asyncio.run(check_invoice_status())

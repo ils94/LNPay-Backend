@@ -21,10 +21,9 @@
 # SOFTWARE.
 
 import asyncio
-import db
-import check_status
-import refund_api
-import delivery
+from src.database import db
+from src.services import check_status, refund_api
+from src.config import delivery
 
 
 # Use this to check the received invoice from the webhook

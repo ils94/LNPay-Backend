@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import requests
-import currencies
+from src.utils import currencies
 import time
 
 # Variable to store the last fetch time and price

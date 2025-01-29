@@ -21,9 +21,8 @@
 # SOFTWARE.
 
 import requests
-import convert
-import global_variables
-import metadata
+from src.services import convert
+from src.config import global_variables, metadata
 
 
 # Function to generate an invoice. You can modify the part for the correlation id for something else that your system

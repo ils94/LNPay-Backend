@@ -22,12 +22,16 @@
 
 import sqlite3
 from datetime import datetime, timedelta
-import global_variables
+from src.config import global_variables
+import os
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(base_dir, "invoices.sqlite")
 
 
 # Function to create the SQLite database and table
 def create_database():
-    connection = sqlite3.connect("invoices.sqlite")
+    connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
 
     cursor.execute('''
@@ -104,7 +108,7 @@ def insert_invoice(json_data, ln_address):
         lninvoice = quote['lnInvoice']
 
         # Insert into the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         cursor.execute('''
@@ -128,7 +132,7 @@ def insert_invoice(json_data, ln_address):
 def get_unpaid_invoices():
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query for all UNPAID invoice IDs
@@ -151,7 +155,7 @@ def get_unpaid_invoices():
 def is_invoice_paid(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to check if the invoice state is 'PAID' for the given invoice ID
@@ -179,7 +183,7 @@ def is_invoice_paid(invoice_id):
 def set_invoice_paid(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Execute the UPDATE query to set state as 'PAID'
@@ -203,7 +207,7 @@ def set_invoice_paid(invoice_id):
 def get_paid_undelivered_invoices():
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query for all invoice IDs where state is PAID and delivered is NO
@@ -229,7 +233,7 @@ def get_paid_undelivered_invoices():
 def set_invoice_delivered(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Execute the UPDATE query to set delivered as 'YES'
@@ -253,7 +257,7 @@ def set_invoice_delivered(invoice_id):
 def get_delivered_status(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to get the delivered status of the given invoiceId
@@ -276,7 +280,7 @@ def get_delivered_status(invoice_id):
 def delete_invoice_by_id(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Execute the DELETE query
@@ -303,7 +307,7 @@ def is_invoice_valid(invoice_id):
     try:
 
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Get the current time in ISO 8601 format
@@ -337,7 +341,7 @@ def is_invoice_valid_one_hour(invoice_id):
         offset_minutes = -5
 
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Get the current time in ISO 8601 format
@@ -365,7 +369,7 @@ def is_invoice_valid_one_hour(invoice_id):
 def get_refund_details(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to get refund_address and amount from refund_failure table for the given invoiceId
@@ -392,7 +396,7 @@ def get_refund_details(invoice_id):
 def copy_to_expired(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Select the row where invoiceId matches
@@ -428,7 +432,7 @@ def copy_to_expired(invoice_id):
 def get_all_expired():
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to select all records from the expired table
@@ -454,7 +458,7 @@ def get_all_expired():
 def get_expired_details(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to get refund_address and amount from expired table for the given invoiceId
@@ -481,7 +485,7 @@ def get_expired_details(invoice_id):
 def delete_expired_invoice(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Execute the DELETE query
@@ -508,7 +512,7 @@ def delete_expired_invoice(invoice_id):
 def copy_to_refund_failure(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Select the row where invoiceId matches
@@ -544,7 +548,7 @@ def copy_to_refund_failure(invoice_id):
 def get_refund_failure_details(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to get refund_address and amount from refund_failure table for the given invoiceId
@@ -571,7 +575,7 @@ def get_refund_failure_details(invoice_id):
 def get_all_refund_failures():
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Query to select all records from the expired table
@@ -597,7 +601,7 @@ def get_all_refund_failures():
 def delete_refund_failure_invoice(invoice_id):
     try:
         # Connect to the database
-        connection = sqlite3.connect("invoices.sqlite")
+        connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
         # Execute the DELETE query

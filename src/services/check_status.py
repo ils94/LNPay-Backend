@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import requests
-import global_variables
+from src.config import global_variables
 
 
 # Function to call the Strike API to check an invoice state (paid or unpaid)
