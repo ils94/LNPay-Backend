@@ -143,6 +143,8 @@ You can use `key_generator.py` to generate a random 10 length string to use as y
 
 ### 7. Customize Delivery Logic
 Update `delivery.py` to include your custom logic for handling invoice delivery.
+Update `metadata.py` to include your custom logic for invoice description and correlation id.
+Update `global_variables.py` to include other custom configs you want.
 
 ## Notes
 
