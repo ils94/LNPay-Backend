@@ -78,8 +78,7 @@ Curl:
 ```bash
 curl -X POST http://localhost:5000/generate-invoice \
      -H "Content-Type: application/json" \
-     -d "{\"amount\": 0.01, \"ln_address\": \"customerlightningaddressforrefundactions\"}" \
-     > "%USERPROFILE%\Desktop\response.html"
+     -d "{\"amount\": 0.01, \"ln_address\": \"customerlightningaddressforrefundactions\"}"
 ```
 This will return:
 - Invoice details
