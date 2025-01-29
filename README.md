@@ -142,9 +142,9 @@ You can use these functions programmatically by importing the module into your s
 You can use `key_generator.py` to generate a random 10 length string to use as your webhook secret.
 
 ### 7. Customize Delivery Logic
-Update `delivery.py` to include your custom logic for handling invoice delivery.
-Update `metadata.py` to include your custom logic for invoice description and correlation id.
-Update `global_variables.py` to include other custom configs you want.
+- Update `delivery.py` to include your custom logic for handling invoice delivery.
+- Update `metadata.py` to include your custom logic for invoice description and correlation id.
+- Update `global_variables.py` to include other custom configs you want.
 
 ## Notes
 
