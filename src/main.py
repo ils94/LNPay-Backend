@@ -23,7 +23,7 @@
 from flask import Flask, request, jsonify
 from src.config import global_variables
 from src.services import invoice
-from src.utils import qr_code_generator, subtract_time
+from src.utils import qr_code_generator, time_string
 from src.database import db
 from src.webhook import webhook_signature, webhook_invoice
 import asyncio
@@ -58,7 +58,7 @@ async def generate_invoice():
                 "invoice": invoice_json["invoice"],
                 "quote": invoice_json["quote"],
                 "qr_code": qr_code_image_base64,
-                "expiration_time": subtract_time.subtract(global_variables.expiration_offset,
+                "expiration_time": time_string.add_offset(global_variables.expiration_offset,
                                                           invoice_json["invoice"]["created"])
             }
         }
