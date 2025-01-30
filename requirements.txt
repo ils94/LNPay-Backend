@@ -2,3 +2,4 @@ flask[async]
 qrcode[pil]
 requests
 python-dotenv
+aiohttp

@@ -276,6 +276,28 @@ def get_delivered_status(invoice_id):
         return f"Error: {e}"
 
 
+# Function to get the 'lnurl' of an invoice
+def get_invoice_lnurl(invoice_id):
+    try:
+        # Connect to the database
+        connection = sqlite3.connect(db_path)
+        cursor = connection.cursor()
+
+        # Query to get the delivered status of the given invoiceId
+        cursor.execute('''
+        SELECT lnInvoice FROM invoices WHERE invoiceId = ?
+        ''', (invoice_id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            return result[0]
+    except Exception as e:
+        return f"Error: {e}"
+
+
 # Function to delete a row where the invoiceId matches. Good to clean the database of unpaid expired invoices
 def delete_invoice_by_id(invoice_id):
     try:

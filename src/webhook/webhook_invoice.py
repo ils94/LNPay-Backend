@@ -27,26 +27,26 @@ from src.config import delivery
 
 
 # Use this to check the received invoice from the webhook
-async def check_state(invoice):
-    is_paid = await asyncio.to_thread(db.is_invoice_paid, invoice)
+async def check_state(invoice_id):
+    is_paid = await asyncio.to_thread(db.is_invoice_paid, invoice_id)
 
     if is_paid:
-        print(f"{invoice} was already processed.")
+        print(f"{invoice_id} was already processed.")
         return
 
-    status = await asyncio.to_thread(check_status.paid_invoice, invoice)
-    print(f"{invoice} status: {status}")
+    status = await asyncio.to_thread(check_status.paid_invoice, invoice_id)
+    print(f"{invoice_id} status: {status}")
 
     if status.upper() != 'PAID':
         return  # Skip further processing if not paid
 
-    is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice)
+    is_valid = await asyncio.to_thread(db.is_invoice_valid, invoice_id)
 
     if not is_valid:
-        await handle_failed_invoice(invoice)
+        await handle_failed_invoice(invoice_id)
         return
 
-    await process_paid_invoice(invoice)
+    await process_paid_invoice(invoice_id)
 
 
 async def handle_failed_invoice(invoice):
@@ -76,6 +76,8 @@ async def process_paid_invoice(invoice):
     if delivered == 'NO':
         print(f"Setting {invoice} as delivered.")
 
-        await delivery.logic()
+        invoice = await asyncio.to_thread(db.get_invoice_lnurl, invoice)
+
+        await delivery.logic(invoice)
 
         await asyncio.to_thread(db.set_invoice_delivered, invoice)

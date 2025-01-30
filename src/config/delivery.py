@@ -20,6 +20,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-async def logic():
-    # Here you will do your all your logic when the payment is done
+
+import aiohttp
+
+
+async def send_webhook(data):
+    url = 'http://localhost:8000/webhook'  # The Flask webhook URL
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data) as response:
+            if response.status == 200:
+                print("Webhook sent successfully!")
+            else:
+                print(f"Failed to send webhook, status code: {response.status}")
+
+
+async def logic(invoice):
+    # Your logic when the payment is done
     print("Product/Service was delivered!")
+
+    # Send success status to the webhook
+    webhook_data = {
+        "status": "success",
+        "message": "Payment processed successfully!",
+        "invoice": invoice
+    }
+
+    # Send the success message to the webhook
+    await send_webhook(webhook_data)
