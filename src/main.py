@@ -49,8 +49,6 @@ async def generate_invoice():
         # Generate a QR code for the invoice
         qr_code_image_base64 = await asyncio.to_thread(qr_code_generator.generate, invoice_json['quote']['lnInvoice'])
 
-        print(invoice_json["invoice"]["created"])
-
         # Create the final response JSON
         response_data = {
             "status": "success",
