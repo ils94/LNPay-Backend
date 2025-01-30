@@ -24,6 +24,7 @@
 import aiohttp
 
 
+# Your website's server should have a webhook to communicate
 async def send_webhook(data):
     url = 'http://localhost:8000/webhook'  # The Flask webhook URL
 
@@ -36,7 +37,14 @@ async def send_webhook(data):
 
 
 async def logic(invoice):
-    # Your logic when the payment is done
+
+    ##############################
+    #                            #
+    #  Your logic when the       #
+    #  payment is done           #
+    #                            #
+    ##############################
+
     print("Product/Service was delivered!")
 
     # Send success status to the webhook

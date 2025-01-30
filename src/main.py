@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from src.config import global_variables
 from src.services import invoice
 from src.utils import qr_code_generator
@@ -37,11 +37,11 @@ async def generate_invoice():
     try:
         # Extract the amount or other data from the request if needed
         data = request.get_json()
-        amount = data.get("amount")
+        amount_fiat = data.get("amount_fiat")
         ln_address = data.get("ln_address")
 
         # Call the generate function.
-        invoice_json = await asyncio.to_thread(invoice.generate, amount)
+        invoice_json = await asyncio.to_thread(invoice.generate, amount_fiat)
 
         # Generate a QR code for the invoice
         qr_code_image_base64 = await asyncio.to_thread(qr_code_generator.generate, invoice_json['quote']['lnInvoice'])
@@ -64,9 +64,6 @@ async def generate_invoice():
 
         # Return the JSON response
         return jsonify(response_data), 200
-
-        # return render_template('qr_code.html', time=time, amount_sats=invoice_json['quote']['sourceAmount']['amount'],
-        #                        qr_code=qr_code_image_base64, invoice=invoice_json['quote']['lnInvoice'])
 
     except Exception as e:
         print("Error:", e)
