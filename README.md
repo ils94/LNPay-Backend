@@ -76,10 +76,7 @@ Send a POST request to `/generate-invoice` with the desired amount:
 ```
 Curl:
 ```bash
-curl -X POST http://localhost:5000/generate-invoice \
-     -H "Content-Type: application/json" \
-     -d "{\"amount\": 0.01, \"ln_address\": \"customerlightningaddressforrefundactions\"}" \
-     > "%USERPROFILE%\Desktop\response.html"
+curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount\": 0.01, \"ln_address\": \"customerlightningaddressforrefundactions\"}"
 ```
 This will return:
 - Invoice details
