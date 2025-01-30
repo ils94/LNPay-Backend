@@ -37,11 +37,14 @@ async def generate_invoice():
     try:
         # Extract the amount or other data from the request if needed
         data = request.get_json()
+
         amount_fiat = data.get("amount_fiat")
         ln_address = data.get("ln_address")
+        description = data.get("description")
+        correlation_id = data.get("correlation_id")
 
         # Call the generate function.
-        invoice_json = await asyncio.to_thread(invoice.generate, amount_fiat)
+        invoice_json = await asyncio.to_thread(invoice.generate, amount_fiat, description, correlation_id)
 
         # Generate a QR code for the invoice
         qr_code_image_base64 = await asyncio.to_thread(qr_code_generator.generate, invoice_json['quote']['lnInvoice'])
