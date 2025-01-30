@@ -34,6 +34,6 @@ webhook_secret = os.getenv("WEBHOOK_SECRET")
 
 webhook_url = os.getenv("WEBHOOK_URL")
 
-currency = "usd"
+currency = os.getenv("CURRENCY")
 
-expiration_offset = 50
+expiration_offset = os.getenv("TIME_OFFSET")

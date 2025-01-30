@@ -23,7 +23,7 @@
 from flask import Flask, request, jsonify
 from src.config import global_variables
 from src.services import invoice
-from src.utils import qr_code_generator
+from src.utils import qr_code_generator, subtract_time
 from src.database import db
 from src.webhook import webhook_signature, webhook_invoice
 import asyncio
@@ -49,7 +49,7 @@ async def generate_invoice():
         # Generate a QR code for the invoice
         qr_code_image_base64 = await asyncio.to_thread(qr_code_generator.generate, invoice_json['quote']['lnInvoice'])
 
-        time = 60 - global_variables.expiration_offset
+        print(invoice_json["invoice"]["created"])
 
         # Create the final response JSON
         response_data = {
@@ -58,7 +58,8 @@ async def generate_invoice():
                 "invoice": invoice_json["invoice"],
                 "quote": invoice_json["quote"],
                 "qr_code": qr_code_image_base64,
-                "expiration_time": time
+                "expiration_time": subtract_time.subtract(global_variables.expiration_offset,
+                                                          invoice_json["invoice"]["created"])
             }
         }
 
