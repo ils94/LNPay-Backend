@@ -38,7 +38,7 @@ async def generate_invoice():
         # Extract the amount or other data from the request if needed
         data = request.get_json()
 
-        amount_fiat = data.get("amount_fiat")
+        amount_fiat = data.get("amount_fiat").replace(",", ".")
         ln_address = data.get("ln_address")
         description = data.get("description")
         correlation_id = data.get("correlation_id")
