@@ -44,7 +44,9 @@ async def process_invoice(invoice):
             if delivered == 'NO':
                 print(f"Setting {invoice} as delivered.")
 
-                await delivery.logic()
+                lnurl = await asyncio.to_thread(db.get_invoice_lnurl, invoice)
+
+                await delivery.logic(lnurl)
 
                 await asyncio.to_thread(db.set_invoice_delivered, invoice)
         else:
