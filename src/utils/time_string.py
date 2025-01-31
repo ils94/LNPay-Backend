@@ -13,6 +13,4 @@ def add_offset(minutes, time_string):
     # Convert back to ISO 8601 string
     new_time_str = new_time_obj.isoformat()
 
-    print(new_time_str)
-
     return new_time_str
