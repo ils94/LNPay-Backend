@@ -68,16 +68,21 @@ To verify the status of invoices and update the database:
 
 ### 3. Generate an Invoice
 Send a POST request to `/generate-invoice` with the desired amount:
+
 ```json
 {
-  "amount": 0.01,
-  "ln_address": "customerlightningaddressforrefundactions"
+  "amount_fiat": "0.01",
+  "ln_address": "customerlightningaddressforrefundactions",
+  "description": "Refund for order #12345",
+  "correlation_id": "abc123xyz"
 }
 ```
+
 Curl:
 ```bash
-curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount\": 0.01, \"ln_address\": \"customerlightningaddressforrefundactions\"}"
+curl -X POST http://localhost:5000/generate-invoice -H "Content-Type: application/json" -d "{\"amount_fiat\": \"0.01\", \"ln_address\": \"customerlightningaddressforrefundactions\", \"description\": \"Refund for order #12345\", \"correlation_id\": \"abc123xyz\"}"
 ```
+
 This will return:
 - Invoice details
 - A QR code (Base64) for the Lightning invoice
@@ -148,6 +153,10 @@ You can use `key_generator.py` to generate a random 10 length string to use as y
 - The `main_worker.py` script should be run alongside the Flask server to continuously update invoice statuses unless you are relying solely on webhooks.
 - The database (`invoices.sqlite`) is created automatically if it does not exist when running `main.py`.
 - Secure your `.env` file and restrict database access in production.
+
+### 8. Test It Yourself
+
+You can download [sampleSiteLNPay](https://github.com/ils94/sampleSiteLNPay) to test the capabilities of the backend. Simply download both **LNPay-Backend** and **sampleSiteLNPay**, run both servers, and test them by sending small amounts of Bitcoin.
 
 ## Troubleshooting
 
