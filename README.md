@@ -16,7 +16,6 @@ You can read more about it below!
 - **Currency to BTC Conversion**: Convert amounts in supported currencies to BTC using the CoinGecko API.
 - **Invoice Management**: Store and manage invoice data in an SQLite database.
 - **Payment Verification**: Verify the status of Lightning invoices (paid or unpaid).
-- **Automated Status Updates**: Use worker scripts to update invoice statuses and delivery status.
 - **QR Code Generation**: Generate QR codes for Lightning invoices for easy payment.
 - **Automatic Refunds**: Refund expired invoices automatically.
 - **Webhook Integration**: Handle payment notifications via webhooks.
@@ -43,10 +42,14 @@ You can read more about it below!
    ```
 
 3. Set up your environment variables:
-   - Create a `.env` file in the root directory.
+   - Create a `.env` file in the `config directory`.
    - Add your Strike API key and any additional environment variables:
      ```env
      STRIKE_API_KEY=your_api_key_here
+     WEBHOOK_SECRET=your_secret_to_sign_your_webhook
+     WEBHOOK_URL=https://your-domain-for-the-webhook.com/webhook
+     TIME_OFFSET=120 #time in seconds for the invoice expiration
+     CURRENCY=usd #the currency your products are listed on your website so CoinGecko API can convert to Bitcoin
      ```
    - [How to obtain your Strike API key](https://docs.strike.me/).
 
@@ -57,30 +60,16 @@ To start the backend server, run:
 ```bash
 python main.py
 ```
-This will:
-- Automatically create the SQLite database (`invoices.sqlite`) if it does not already exist.
-- Start the Flask application for generating invoices and serving QR codes.
+An `invoices.sqlite` file will be generated to store the invoices created by the user.
 
-### 2. Verifying Invoice Status
-To verify the status of invoices and update the database:
-1. Run the `main_worker.py` script:
-   ```bash
-   python main_worker.py
-   ```
-   The worker script:
-   - Loops through all unpaid invoices.
-   - Checks their status using the Strike API.
-   - Updates the status in the database.
-
-> **Note**: If you plan to use webhooks, it is recommended not to use the `main_worker.py` script. Relying on webhooks will delegate state updates to Strike, which can simplify your workflow but introduces dependency on their notifications.
-
-### 3. Generate an Invoice
+### 2. Generate an Invoice
 Send a POST request to `/generate-invoice` with the desired amount:
 
+Json:
 ```json
 {
   "amount_fiat": "0.01",
-  "ln_address": "customerlightningaddressforrefundactions",
+  "ln_address": "customer_lightning_address_for_refunding_expired_invoice",
   "description": "Refund for order #12345",
   "correlation_id": "abc123xyz"
 }
@@ -95,29 +84,25 @@ This will return:
 - Invoice details
 - A QR code (Base64) for the Lightning invoice
 
-### 4. Worker Scripts
+### 3. Worker Scripts
 
 - **`main_worker.py`**: Updates the status of unpaid invoices.
 - **`expired_worker.py`**: Identifies expired invoices and processes automatic refunds.
 - **`refund_failure_worker.py`**: Retries refunds that previously failed.
 
-Schedule these scripts using cron (Linux) or Task Scheduler (Windows) for continuous operation.
+Schedule these scripts using Cron (Linux) or Task Scheduler (Windows) for continuous operation. Do not run `main_worker.py` together with your webhook, as they might conflict. You should run both `expired_worker.py` and `refund_failure_worker.py`, as they handle the task of refunding invoices that encountered errors for some reason.
 
-### 5. Webhook Integration
-LNPay-Backend supports webhook notifications to process payments and update invoice statuses automatically.
+### 4. Webhook Integration
+**LNPay** supports webhook notifications to process payments and automatically update invoice statuses. (Your web server should also have a webhook set up to receive updates from **LNPay**).
 
 #### Setting Up Webhooks
-1. Configure your webhook URL in the Strike API dashboard. Use the following format:
-   ```
-   http://<your_server_address>/webhook
-   ```
+1. Configure your webhook URL as well as your secret in the Strike API by using `webhook_settings.py`
 
-2. Update your `.env` file with the required secret for verifying webhook signatures:
+2. Update your `.env` :
    ```env
+   WEBHOOK_URL=https://your-domain-for-the-webhook.com/webhook
    WEBHOOK_SECRET=your_webhook_secret_here
    ```
-
-3. Start the Flask server (`main.py`) to listen for incoming webhook events.
 
 #### How Webhooks Work
 - The webhook endpoint (`/webhook`) receives payment notifications from the Strike API.
@@ -127,8 +112,6 @@ LNPay-Backend supports webhook notifications to process payments and update invo
 #### Testing Webhooks
 You can use tools like [Cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) to expose your local server to the internet and test webhook functionality:
 
-cloudflared:
-
 ```bash
 cloudflared-windows-amd64.exe tunnel --url http://127.0.0.1:5000
 ```
@@ -136,33 +119,16 @@ cloudflared-windows-amd64.exe tunnel --url http://127.0.0.1:5000
 Copy the generated URL and set it as your webhook URL in the `.env` file.
 
 ```env
-WEBHOOK_URL=https://yoururlhere/webhook
+WEBHOOK_URL=https://your-domain-for-the-webhook.com/webhook
 ```
-
-### 6. Webhook Subscription Management
-The `webhook_subscription.py` module includes functions to:
-
-- **Subscribe to a webhook**: Create a new webhook subscription.
-- **Unsubscribe from a webhook**: Remove an existing webhook subscription.
-- **Update a webhook**: Modify an existing subscription.
-- **List subscriptions**: View all current webhook subscriptions.
-
-You can use these functions programmatically by importing the module into your scripts. Refer to the code in `webhook_subscription.py` for usage examples.
 
 You can use `key_generator.py` to generate a random 10 length string to use as your webhook secret.
 
-### 7. Customize Delivery Logic
-- Update `delivery.py` to include your custom logic for handling invoice delivery.
-- Update `metadata.py` to include your custom logic for invoice description and correlation id.
-- Update `global_variables.py` to include other custom configs you want.
+### 5. Customize Delivery Logic
 
-## Notes
+Update `delivery.py` to incorporate your custom logic for handling invoice delivery. This is where **LNPay** will send a POST request to your webhook, notifying you when the payment is successful.
 
-- The `main_worker.py` script should be run alongside the Flask server to continuously update invoice statuses unless you are relying solely on webhooks.
-- The database (`invoices.sqlite`) is created automatically if it does not exist when running `main.py`.
-- Secure your `.env` file and restrict database access in production.
-
-### 8. Test It Yourself
+### 6. Test It Yourself
 
 You can download [sampleSiteLNPay](https://github.com/ils94/sampleSiteLNPay) to test the capabilities of the backend. Simply download both **LNPay-Backend** and **sampleSiteLNPay**, run both servers, and test them by sending small amounts of Bitcoin.
 
@@ -178,4 +144,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 For further questions or support, refer to the [Strike API documentation](https://docs.strike.me/) or open an issue on this repository.
+
 
