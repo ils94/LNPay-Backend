@@ -2,6 +2,14 @@
 
 LNPay-Backend is a backend solution for handling Bitcoin Lightning Network payments using the Strike API. It allows you to generate and manage Lightning invoices, track payment statuses, and handle delivery status, all while storing invoice data in a local SQLite database. This solution is ideal for e-commerce platforms.
 
+## Introduction
+
+This project was inspired by the lack of real-world applications for the Lightning Network in e-commerce. Many websites that accept Bitcoin as payment still rely on Layer 1, and some don’t even use native SegWit addresses, which increases transaction fees for customers, not to mention the slowness of Layer 1 transactions. In contrast, the Lightning Network is fast, highly scalable, and reliable. You don’t need to set up your own node or open channels with every client, simply use a good Lightning Network API like Strike. I'm not sponsored by them; I just really appreciate how well-documented their API is.
+
+I developed this backend to simplify the integration of Bitcoin payments into e-commerce platforms. It’s incredibly easy to install, just download Python, install the dependencies, configure your .env file, and run main.py. That’s it!
+
+You can read more about it below!
+
 ## Features
 
 - **Invoice Generation**: Automatically generate Bitcoin Lightning invoices using the Strike API.
