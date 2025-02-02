@@ -24,13 +24,13 @@ from datetime import datetime, timedelta
 
 
 def add_offset(seconds, time_string):
-    # Converter a string para um objeto datetime
+    # Convert string into datetime object
     time_obj = datetime.fromisoformat(time_string)
 
     # add the seconds to the timer string (makes sense for the frontend, trust me)
     new_time_obj = time_obj + timedelta(seconds=seconds)
 
-    # Converter de volta para uma string no formato ISO 8601
+    # convert back to format ISO 8601
     new_time_str = new_time_obj.isoformat()
 
     return new_time_str

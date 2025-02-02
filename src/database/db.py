@@ -332,6 +332,8 @@ def is_invoice_valid(invoice_id):
         connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
+        # Kinda lost here, but I did what it was doing before, but now we can use seconds in the off_set
+        # and keep the code working, sorry, im dumb.
         off_set = 3600 - global_variables.expiration_offset
 
         # Get the current time in ISO 8601 format
