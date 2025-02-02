@@ -332,8 +332,10 @@ def is_invoice_valid(invoice_id):
         connection = sqlite3.connect(db_path)
         cursor = connection.cursor()
 
+        off_set = 3600 - global_variables.expiration_offset
+
         # Get the current time in ISO 8601 format
-        current_time = (datetime.utcnow() + timedelta(minutes=global_variables.expiration_offset)).strftime(
+        current_time = (datetime.utcnow() + timedelta(seconds=off_set)).strftime(
             '%Y-%m-%dT%H:%M:%SZ')
 
         # Query to check if the invoiceId is valid

@@ -23,16 +23,14 @@
 from datetime import datetime, timedelta
 
 
-def add_offset(minutes, time_string):
-    # Parse the string into a datetime object
+def add_offset(seconds, time_string):
+    # Converter a string para um objeto datetime
     time_obj = datetime.fromisoformat(time_string)
 
-    left = 60 - int(minutes)
+    # add the seconds to the timer string (makes sense for the frontend, trust me)
+    new_time_obj = time_obj + timedelta(seconds=seconds)
 
-    # Add minutes to it that can be used by the frontend to show the remaining time.
-    new_time_obj = time_obj + timedelta(minutes=left)
-
-    # Convert back to ISO 8601 string
+    # Converter de volta para uma string no formato ISO 8601
     new_time_str = new_time_obj.isoformat()
 
     return new_time_str
